@@ -1,6 +1,7 @@
 package api.iteration2;
 
 import api.BaseTest;
+import constants.ResponseMessage;
 import models.CreateAccountResponse;
 import models.CreateUserRequest;
 import models.TransferRequest;
@@ -29,8 +30,6 @@ public class AccountTransferTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Перевод между своими счетами")
     public void userCanTransferMoneyBetweenAccounts(double transferAmount) {
-        String successfulMessage = "Transfer successful";
-
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
         CreateAccountResponse secondAccount = UserSteps.createAccount(user);
@@ -49,14 +48,13 @@ public class AccountTransferTest extends BaseTest {
                 ResponseSpecs.requestReturnsOK()
         ).post(transferRequest);
         assertThatModels(transferRequest, transferResponse).match();
-        assertThat(transferResponse.getMessage()).isEqualTo(successfulMessage);
+        assertThat(transferResponse.getMessage()).isEqualTo(ResponseMessage.TRANSFER_SUCCESSFUL.getMessage());
     }
 
     @Test
     @DisplayName("Перевод на чужой счёт")
     public void userCanTransferMoneyToOtherAccounts() {
         double transferAmount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String successfulMessage = "Transfer successful";
 
         CreateUserRequest firstUser = AdminSteps.createUser();
         CreateUserRequest secondUser = AdminSteps.createUser();
@@ -75,15 +73,15 @@ public class AccountTransferTest extends BaseTest {
                 Endpoint.ACCOUNTS_TRANSFER,
                 ResponseSpecs.requestReturnsOK()
         ).post(transferRequest);
+
         assertThatModels(transferRequest, transferResponse).match();
-        assertThat(transferResponse.getMessage()).isEqualTo(successfulMessage);
+        assertThat(transferResponse.getMessage()).isEqualTo(ResponseMessage.TRANSFER_SUCCESSFUL.getMessage());
     }
 
     @ValueSource(doubles = {-1, 0, MAX_TRANSFER_AMOUNT + 1})
     @ParameterizedTest
     @DisplayName("Трансфер невалидной суммы на свой существующий счёт")
     public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount) {
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
 
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
@@ -100,7 +98,7 @@ public class AccountTransferTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
     }
 
@@ -109,7 +107,6 @@ public class AccountTransferTest extends BaseTest {
     public void userCanNotTransferInsufficientMoneyBetweenAccounts() {
         double depositAmount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
         double transferAmount = depositAmount + 1;
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
 
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
@@ -125,7 +122,7 @@ public class AccountTransferTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
     }
 
@@ -134,7 +131,6 @@ public class AccountTransferTest extends BaseTest {
     public void userCanNotTransferToNotExistsAccounts() {
         int notExistsAccountId = generateRandomAccountId();
         double amount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
 
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
@@ -149,7 +145,7 @@ public class AccountTransferTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
     }
 
@@ -157,7 +153,6 @@ public class AccountTransferTest extends BaseTest {
     @DisplayName("Перевод с чужого аккаунта на свой")
     public void userCanNotTransferFromNeSvoyAccount() {
         double amount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String errorMessage = "Unauthorized access to account";
 
         CreateUserRequest firstUser = AdminSteps.createUser();
         CreateUserRequest secondUser = AdminSteps.createUser();
@@ -174,7 +169,7 @@ public class AccountTransferTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(firstUser.getUsername(), firstUser.getPassword()),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsForbidden(errorMessage)
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(transferRequest);
     }
 }

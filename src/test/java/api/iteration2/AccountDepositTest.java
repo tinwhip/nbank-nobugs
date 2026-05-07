@@ -1,6 +1,7 @@
 package api.iteration2;
 
 import api.BaseTest;
+import constants.ResponseMessage;
 import models.CreateAccountResponse;
 import models.CreateUserRequest;
 import models.DepositRequest;
@@ -45,7 +46,6 @@ public class AccountDepositTest extends BaseTest {
         assertThat(depositAccountResponse.getBalance()).isEqualTo(amount);
         assertThat(depositAccountResponse.getTransactions().get(0).getRelatedAccountId()).isEqualTo(account.getId());
 
-        //проверить, что у аккаунта отображается транзакция
         List<TransactionsResponse> transactions = new ValidatedCrudRequester<TransactionsResponse>(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNT_TRANSACTIONS,
@@ -70,7 +70,7 @@ public class AccountDepositTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsBadRequest("Invalid account or amount")
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_ACCOUNT_OR_AMOUNT.getMessage())
         ).post(
                 new DepositRequest(account.getId(), amount)
         );
@@ -94,7 +94,7 @@ public class AccountDepositTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsForbidden("Unauthorized access to account")
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
                 new DepositRequest(notExistsAccountId, amount)
         );
@@ -111,7 +111,7 @@ public class AccountDepositTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(firstUser.getUsername(), firstUser.getPassword()),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsForbidden("Unauthorized access to account")
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
                 new DepositRequest(account.getId(), amount)
         );

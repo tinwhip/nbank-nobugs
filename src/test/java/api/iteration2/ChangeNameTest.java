@@ -1,6 +1,7 @@
 package api.iteration2;
 
 import api.BaseTest;
+import constants.ResponseMessage;
 import models.CreateUserRequest;
 import models.CustomerProfileRequest;
 import models.GetCustomerProfileResponse;
@@ -31,7 +32,6 @@ public class ChangeNameTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Изменение имени пользователя на валидное значение")
     public void userCanUpdateValidName(String name) {
-        String expectedMessage = "Profile updated successfully";
 
         CreateUserRequest user = AdminSteps.createUser();
 
@@ -42,7 +42,9 @@ public class ChangeNameTest extends BaseTest {
                         ResponseSpecs.requestReturnsOK()
                 ).update(new CustomerProfileRequest(name));
         assertThat(updateCustomerProfileResponse.getCustomer().getName()).isEqualTo(name);
-        assertThat(updateCustomerProfileResponse.getMessage()).isEqualTo(expectedMessage);
+        assertThat(updateCustomerProfileResponse.getMessage()).isEqualTo(
+                ResponseMessage.PROFILE_UPDATED_SUCCESSFULLY.getMessage()
+        );
 
         GetCustomerProfileResponse getCustomerProfileResponse =
                 new ValidatedCrudRequester<GetCustomerProfileResponse>(
