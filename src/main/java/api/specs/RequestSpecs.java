@@ -1,7 +1,7 @@
 package api.specs;
 
-import api.ResponseSpecs;
 import api.configs.Config;
+import api.requests.skeleton.requesters.CrudRequester;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -9,7 +9,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import api.models.LoginUserRequest;
 import api.Endpoint;
-import api.requesters.CrudRequester;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,7 @@ public class RequestSpecs {
                 .addFilters(List.of(
                         new RequestLoggingFilter(), new ResponseLoggingFilter()
                 ))
-                .setBaseUri(Config.getProperty("server"))
+                .setBaseUri(Config.getProperty("apiBaseUrl"))
                 .setBasePath(Config.getProperty("apiVersion"));
     }
 
@@ -43,6 +42,12 @@ public class RequestSpecs {
     }
 
     public static RequestSpecification authAsUser(String username, String password) {
+        return defaultRequestBuilder()
+                .addHeader("Authorization", getUserAuthHeader(username, password))
+                .build();
+    }
+
+    public static String getUserAuthHeader(String username, String password) {
         String userAuthHeader;
         if (!authHeaders.containsKey(username)) {
             LoginUserRequest loginUserRequest = LoginUserRequest.builder()
@@ -52,7 +57,7 @@ public class RequestSpecs {
             userAuthHeader = new CrudRequester(
                     RequestSpecs.unauthSpec(),
                     Endpoint.LOGIN,
-                    ResponseSpecs.requestReturnsOK()
+                    api.specs.ResponseSpecs.requestReturnsOK()
             )
                     .post(loginUserRequest)
                     .extract()
@@ -62,8 +67,6 @@ public class RequestSpecs {
             userAuthHeader = authHeaders.get(username);
         }
 
-        return defaultRequestBuilder()
-                .addHeader("Authorization", userAuthHeader)
-                .build();
+        return userAuthHeader;
     }
 }

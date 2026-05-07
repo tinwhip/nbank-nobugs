@@ -4,9 +4,11 @@ import api.generators.RandomModelGenerator;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
 import api.Endpoint;
-import api.requesters.ValidatedCrudRequester;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+
+import java.util.List;
 
 public class AdminSteps {
     public static CreateUserRequest createUser() {
@@ -19,6 +21,14 @@ public class AdminSteps {
         ).post(userRequest);
 
         return userRequest;
+    }
+
+    public static List<CreateUserResponse> getAllUsers() {
+        return new ValidatedCrudRequester<CreateUserResponse>(
+                RequestSpecs.adminSpec(),
+                Endpoint.ADMIN_USER,
+                ResponseSpecs.requestReturnsOK()
+        ).getAll(CreateUserResponse[].class);
     }
 
 }

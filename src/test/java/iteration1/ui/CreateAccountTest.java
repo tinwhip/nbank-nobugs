@@ -1,5 +1,7 @@
 package iteration1.ui;
 
+import api.requests.skeleton.requesters.CrudRequester;
+import api.requests.steps.UserSteps;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
@@ -10,11 +12,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
 import api.Endpoint;
-import api.requesters.CrudRequester;
 import api.requests.steps.AdminSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import ui.pages.BankAlert;
+import ui.pages.UserDashboard;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,61 +28,24 @@ import static com.codeborne.selenide.Selenide.switchTo;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CreateAccountTest {
-    @BeforeAll
-    public static void setupSelenoid() {
-        Configuration.remote = "http://localhost:4444/wd/hub";
-        Configuration.baseUrl = "http://192.168.1.66:3000";
-        Configuration.browserSize = "1920x1080";
-        Configuration.browser = "chrome";
-
-        Configuration.browserCapabilities.setCapability(
-                "selenoid:options",
-                Map.of("enableVNC", true, "enableLog", true)
-        );
-    }
+public class CreateAccountTest extends BaseUiTest {
 
     @Test
     public void userCanCreateAccountTest() {
         CreateUserRequest user = AdminSteps.createUser();
-        String userAuthHeader = new CrudRequester(
-                RequestSpecs.unauthSpec(),
-                Endpoint.LOGIN,
-                ResponseSpecs.requestReturnsOK()
-        )
-                .post(new LoginUserRequest(user.getUsername(), user.getPassword()))
-                .extract()
-                .header("Authorization");
 
-        Selenide.open("/");
+        authAsUser(user);
 
-        Selenide.executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+        new UserDashboard().open().createNewAccount();
 
-        Selenide.open("/dashboard");
+        List<CreateAccountResponse> createdAccounts = new UserSteps(user.getUsername(), user.getPassword())
+                .getAllAccounts();
 
-        $(Selectors.byText("➕ Create New Account")).click();
+        assertThat(createdAccounts).hasSize(1);
 
-        Alert alert = switchTo().alert();
-        String alertText = alert.getText();
-        assertThat(alertText).contains("✅ New Account Created! Account Number:");
-        alert.accept();
+        new UserDashboard().checkAlertMessageAndAccept
+                (BankAlert.NEW_ACCOUNT_CREATED.getMessage() + createdAccounts.get(0).getAccountNumber());
 
-        Pattern pattern = Pattern.compile("Account Number: (\\w+)");
-        Matcher matcher = pattern.matcher(alertText);
-        matcher.find();
-        String createdAccNumber = matcher.group(1);
-
-        //аккаунт был создан на API
-        CreateAccountResponse[] existingUserAccounts = new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
-                Endpoint.CUSTOMER_ACCOUNTS,
-                ResponseSpecs.requestReturnsOK()
-        ).get().statusCode(SC_OK)
-                .extract().as(CreateAccountResponse[].class);
-        assertThat(existingUserAccounts).hasSize(1);
-
-        CreateAccountResponse createdAccount = existingUserAccounts[0];
-        assertThat(createdAccount).isNotNull();
-        assertThat(createdAccount.getBalance()).isZero();
+        assertThat(createdAccounts.get(0).getBalance()).isZero();
     }
 }

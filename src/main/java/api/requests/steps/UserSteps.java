@@ -2,13 +2,23 @@ package api.requests.steps;
 
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
+import api.models.CreateUserResponse;
 import api.models.DepositRequest;
 import api.Endpoint;
-import api.requesters.ValidatedCrudRequester;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
+import java.util.List;
+
 public class UserSteps {
+    private String username;
+    private String password;
+
+    public UserSteps(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
     public static final double MAX_DEPOSIT_AMOUNT = 5_000;
     public static final double MAX_TRANSFER_AMOUNT = 10_000;
@@ -47,10 +57,18 @@ public class UserSteps {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll().stream()
+        ).getAll(CreateAccountResponse[].class).stream()
                 .filter(accountInList -> accountId == accountInList.getId())
                 .findAny().orElseThrow(
                         () -> new RuntimeException("No account with id = %s for customer".formatted(accountId))
                 );
+    }
+
+    public List<CreateAccountResponse> getAllAccounts() {
+        return new ValidatedCrudRequester<CreateAccountResponse>(
+                RequestSpecs.authAsUser(username, password),
+                Endpoint.CUSTOMER_ACCOUNTS,
+                ResponseSpecs.requestReturnsOK()
+        ).getAll(CreateAccountResponse[].class);
     }
 }

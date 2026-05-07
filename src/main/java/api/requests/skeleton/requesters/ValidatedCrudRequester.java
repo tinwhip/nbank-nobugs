@@ -1,18 +1,20 @@
-package api.requesters;
+package api.requests.skeleton.requesters;
 
+import api.requests.skeleton.interfaces.CrudEndpointInterface;
+import api.requests.skeleton.interfaces.GetAllEndpointInterface;
+import api.requests.skeleton.interfaces.GetAllInterface;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import api.models.BaseModel;
 import api.Endpoint;
 import api.HttpRequest;
-import api.interfaces.CrudEndpointInterface;
-import api.interfaces.GetAllInterface;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
-public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest implements CrudEndpointInterface, GetAllInterface<M> {
+public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest implements CrudEndpointInterface, GetAllEndpointInterface {
     private CrudRequester crudRequester;
 
     public ValidatedCrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
@@ -46,23 +48,8 @@ public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest imp
     }
 
     @Override
-    public List<M> getAll() {
-        return given()
-                .spec(requestSpecification)
-                .get(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification)
-                .extract().jsonPath().getList("", (Class<M>) endpoint.getResponseModel());
-    }
-
-    @Override
-    public List<M> getAll(Object id) {
-        return given()
-                .spec(requestSpecification)
-                .pathParam("id", id)
-                .get(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification)
-                .extract().jsonPath().getList("", (Class<M>) endpoint.getResponseModel());
+    public List<M> getAll(Class<?> clazz) {
+        M[] array = (M[]) crudRequester.getAll(clazz).extract().as(clazz);
+        return Arrays.asList(array);
     }
 }

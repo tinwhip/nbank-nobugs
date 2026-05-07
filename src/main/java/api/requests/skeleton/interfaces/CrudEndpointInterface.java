@@ -1,4 +1,4 @@
-package api.interfaces;
+package api.requests.skeleton.interfaces;
 
 import api.models.BaseModel;
 

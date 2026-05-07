@@ -1,5 +1,7 @@
 package iteration2.api;
 
+import api.requests.skeleton.requesters.CrudRequester;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import iteration1.api.BaseTest;
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import api.Endpoint;
-import api.requesters.CrudRequester;
-import api.requesters.ValidatedCrudRequester;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
 import api.specs.RequestSpecs;

@@ -2,9 +2,9 @@ package iteration1.api;
 
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import org.junit.jupiter.api.Test;
 import api.Endpoint;
-import api.requesters.ValidatedCrudRequester;
 import api.requests.steps.AdminSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
@@ -30,7 +30,7 @@ public class CreateAccountTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll();
+        ).getAll(CreateAccountResponse[].class);
         assertThat(accountResponse).isEqualTo(accounts.get(0));
     }
 }

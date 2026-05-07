@@ -1,5 +1,7 @@
 package iteration2.api;
 
+import api.requests.skeleton.requesters.CrudRequester;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import iteration1.api.BaseTest;
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import api.Endpoint;
-import api.requesters.CrudRequester;
-import api.requesters.ValidatedCrudRequester;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
 import api.specs.RequestSpecs;
@@ -50,7 +50,7 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll(account.getId());
+        ).getAll(TransactionsResponse[].class);
         assertThat(transactions.size()).isEqualTo(1);
         assertThat(transactions.get(0)).isEqualTo(depositAccountResponse.getTransactions().get(0));
 
@@ -80,7 +80,7 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll(account.getId());
+        ).getAll(TransactionsResponse[].class);
         assertThat(transactions.size()).isEqualTo(0);
     }
 
