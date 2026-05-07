@@ -50,7 +50,7 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll(account.getId());
+        ).getAll(TransactionsResponse.class);
         assertThat(transactions.size()).isEqualTo(1);
         assertThat(transactions.get(0)).isEqualTo(depositAccountResponse.getTransactions().get(0));
 
@@ -80,7 +80,7 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll(account.getId());
+        ).getAll(TransactionsResponse[].class);
         assertThat(transactions.size()).isEqualTo(0);
     }
 

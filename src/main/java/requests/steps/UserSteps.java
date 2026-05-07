@@ -47,7 +47,7 @@ public class UserSteps {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll().stream()
+        ).getAll(CreateAccountResponse.class).stream()
                 .filter(accountInList -> accountId == accountInList.getId())
                 .findAny().orElseThrow(
                         () -> new RuntimeException("No account with id = %s for customer".formatted(accountId))

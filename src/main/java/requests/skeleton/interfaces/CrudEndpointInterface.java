@@ -12,4 +12,6 @@ public interface CrudEndpointInterface {
     Object update(BaseModel baseModel);
 
     Object delete(long id);
+
+    Object getAll(Class<?> clazz);
 }

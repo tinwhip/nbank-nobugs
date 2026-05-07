@@ -8,7 +8,7 @@ import requests.skeleton.Endpoint;
 import requests.skeleton.HttpRequest;
 import requests.skeleton.interfaces.CrudEndpointInterface;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
 
 public class CrudRequester extends HttpRequest implements CrudEndpointInterface {
     public CrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
@@ -61,6 +61,15 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
                 .spec(requestSpecification)
                 .pathParam("id", id)
                 .delete(endpoint.getUrl())
+                .then()
+                .spec(responseSpecification);
+    }
+
+    @Override
+    public ValidatableResponse getAll(Class<?> clazz) {
+        return given()
+                .spec(requestSpecification)
+                .get(endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }

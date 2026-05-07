@@ -31,7 +31,7 @@ public class CreateAccountTest extends BaseTest {
                 RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll();
+        ).getAll(CreateAccountResponse.class);
         assertThat(accountResponse).isEqualTo(accounts.get(0));
     }
 }

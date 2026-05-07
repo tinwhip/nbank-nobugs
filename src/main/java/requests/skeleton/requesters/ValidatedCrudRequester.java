@@ -6,13 +6,13 @@ import models.BaseModel;
 import requests.skeleton.Endpoint;
 import requests.skeleton.HttpRequest;
 import requests.skeleton.interfaces.CrudEndpointInterface;
-import requests.skeleton.interfaces.GetAllInterface;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
-public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest implements CrudEndpointInterface, GetAllInterface<M> {
+public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest implements CrudEndpointInterface {
     private CrudRequester crudRequester;
 
     public ValidatedCrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
@@ -46,23 +46,8 @@ public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest imp
     }
 
     @Override
-    public List<M> getAll() {
-        return given()
-                .spec(requestSpecification)
-                .get(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification)
-                .extract().jsonPath().getList("", (Class<M>) endpoint.getResponseModel());
-    }
-
-    @Override
-    public List<M> getAll(Object id) {
-        return given()
-                .spec(requestSpecification)
-                .pathParam("id", id)
-                .get(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification)
-                .extract().jsonPath().getList("", (Class<M>) endpoint.getResponseModel());
+    public List<M> getAll(Class<?> clazz) {
+        M[] array = (M[]) crudRequester.getAll(clazz).extract().as(clazz);
+        return Arrays.asList(array);
     }
 }

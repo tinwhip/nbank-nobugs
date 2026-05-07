@@ -2,10 +2,7 @@ package api.iteration1;
 
 import api.BaseTest;
 import constants.AdminCredentials;
-import models.CreateUserRequest;
-import models.LoginUserRequest;
-import models.LoginUserResponse;
-import models.UserRole;
+import models.*;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import requests.skeleton.Endpoint;
@@ -14,6 +11,8 @@ import requests.skeleton.requesters.ValidatedCrudRequester;
 import requests.steps.AdminSteps;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,10 +49,16 @@ public class LoginUserTest extends BaseTest {
                 .body("username", Matchers.equalTo(user.getUsername()))
                 .body("role", Matchers.equalTo(UserRole.USER.name()));
 
-        new CrudRequester(
+        List<GetCustomerProfileResponse> customers = new ValidatedCrudRequester<GetCustomerProfileResponse>(
                 RequestSpecs.adminSpec(),
                 Endpoint.ADMIN_USER,
                 ResponseSpecs.requestReturnsOK()
-        ).get();
+        ).getAll(GetCustomerProfileResponse[].class);
+
+        assertThat(
+                customers.stream()
+                        .filter(customer -> customer.getUsername().equals(user.getUsername()))
+                        .toList()
+        ).hasSize(1);
     }
 }
