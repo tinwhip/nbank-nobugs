@@ -5,6 +5,7 @@ import io.restassured.specification.ResponseSpecification;
 import models.BaseModel;
 import requests.skeleton.Endpoint;
 import requests.skeleton.HttpRequest;
+import requests.skeleton.RequestParams;
 import requests.skeleton.interfaces.CrudEndpointInterface;
 
 import java.util.Arrays;
@@ -26,8 +27,8 @@ public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest imp
     }
 
     @Override
-    public M get(long id) {
-        return (M) crudRequester.get(id).extract().as(endpoint.getResponseModel());
+    public M get(RequestParams requestParams) {
+        return (M) crudRequester.get(requestParams).extract().as(endpoint.getResponseModel());
     }
 
     @Override
@@ -41,13 +42,19 @@ public class ValidatedCrudRequester<M extends BaseModel> extends HttpRequest imp
     }
 
     @Override
-    public Object delete(long id) {
-        return (M) crudRequester.delete(id).extract().as(endpoint.getResponseModel());
+    public Object delete(RequestParams requestParams) {
+        return (M) crudRequester.delete(requestParams).extract().as(endpoint.getResponseModel());
     }
 
     @Override
     public List<M> getAll(Class<?> clazz) {
         M[] array = (M[]) crudRequester.getAll(clazz).extract().as(clazz);
+        return Arrays.asList(array);
+    }
+
+    @Override
+    public List<M> getAll(RequestParams requestParams, Class<?> clazz) {
+        M[] array = (M[]) crudRequester.getAll(requestParams, clazz).extract().as(clazz);
         return Arrays.asList(array);
     }
 }

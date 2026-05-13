@@ -6,6 +6,7 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import models.CreateUserRequest;
 import models.LoginUserRequest;
 import requests.skeleton.Endpoint;
 import requests.skeleton.requesters.CrudRequester;
@@ -64,5 +65,9 @@ public class RequestSpecs {
         return defaultRequestBuilder()
                 .addHeader("Authorization", userAuthHeader)
                 .build();
+    }
+
+    public static RequestSpecification authAsUser(CreateUserRequest user) {
+        return authAsUser(user.getUsername(), user.getPassword());
     }
 }

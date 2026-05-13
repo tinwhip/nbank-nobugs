@@ -21,17 +21,17 @@ public class CreateAccountTest extends BaseTest {
         CreateUserRequest user = AdminSteps.createUser();
 
         CreateAccountResponse accountResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS,
                 ResponseSpecs.entityWasCreated()
         ).post(null);
 
         //запросить все аккаунты пользователя и проверить, что наш аккаунт там
         List<CreateAccountResponse> accounts = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
-        ).getAll(CreateAccountResponse.class);
+        ).getAll(CreateAccountResponse[].class);
         assertThat(accountResponse).isEqualTo(accounts.get(0));
     }
 }

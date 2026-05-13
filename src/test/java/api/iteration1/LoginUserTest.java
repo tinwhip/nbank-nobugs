@@ -57,8 +57,9 @@ public class LoginUserTest extends BaseTest {
 
         assertThat(
                 customers.stream()
-                        .filter(customer -> customer.getUsername().equals(user.getUsername()))
-                        .toList()
+                        .filter(
+                                customer -> customer.getUsername().equals(user.getUsername())
+                        ).toList()
         ).hasSize(1);
     }
 }
