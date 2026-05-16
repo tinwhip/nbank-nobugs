@@ -3,14 +3,10 @@ package iteration1.ui;
 import api.models.CreateUserRequest;
 import api.requests.steps.AdminSteps;
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.Configuration;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ui.pages.AdminPanel;
 import ui.pages.LoginPage;
 import ui.pages.UserDashboard;
-
-import java.util.Map;
 
 public class LoginUserTest extends BaseUiTest {
     @Test
@@ -30,7 +26,6 @@ public class LoginUserTest extends BaseUiTest {
         new LoginPage().open()
                 .login(user.getUsername(), user.getPassword())
                 .getPage(UserDashboard.class)
-                .getWelcomeText()
-                .shouldBe(Condition.visible).shouldHave(Condition.text("Welcome, noname!"));
+                .getWelcomeText().shouldBe(Condition.visible).shouldHave(Condition.text("Welcome, noname!"));
     }
 }
