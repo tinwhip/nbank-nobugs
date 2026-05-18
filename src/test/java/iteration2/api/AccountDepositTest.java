@@ -7,6 +7,12 @@ import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
 import api.models.DepositRequest;
 import api.models.TransactionsResponse;
+import api.BaseTest;
+import constants.ResponseMessage;
+import models.CreateAccountResponse;
+import models.CreateUserRequest;
+import models.DepositRequest;
+import models.TransactionsResponse;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +41,7 @@ public class AccountDepositTest extends BaseTest {
 
         //закинуть деньги на счёт
         CreateAccountResponse depositAccountResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsOK()
         ).post(
@@ -45,12 +51,7 @@ public class AccountDepositTest extends BaseTest {
         assertThat(depositAccountResponse.getBalance()).isEqualTo(amount);
         assertThat(depositAccountResponse.getTransactions().get(0).getRelatedAccountId()).isEqualTo(account.getId());
 
-        //проверить, что у аккаунта отображается транзакция
-        List<TransactionsResponse> transactions = new ValidatedCrudRequester<TransactionsResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
-                Endpoint.ACCOUNT_TRANSACTIONS,
-                ResponseSpecs.requestReturnsOK()
-        ).getAll(TransactionsResponse[].class);
+        List<TransactionsResponse> transactions = UserSteps.getAllTransactionsByAccountId(user, account.getId());
         assertThat(transactions.size()).isEqualTo(1);
         assertThat(transactions.get(0)).isEqualTo(depositAccountResponse.getTransactions().get(0));
 
@@ -68,33 +69,29 @@ public class AccountDepositTest extends BaseTest {
 
         //закинуть деньги на счёт
         new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsBadRequest("Invalid account or amount")
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_ACCOUNT_OR_AMOUNT.getMessage())
         ).post(
                 new DepositRequest(account.getId(), amount)
         );
 
         //проверить, что у аккаунта не отображается транзакция
-        List<TransactionsResponse> transactions = new ValidatedCrudRequester<TransactionsResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
-                Endpoint.ACCOUNT_TRANSACTIONS,
-                ResponseSpecs.requestReturnsOK()
-        ).getAll(TransactionsResponse[].class);
+        List<TransactionsResponse> transactions = getAllTransactionsByAccountId(user, account.getId());
         assertThat(transactions.size()).isEqualTo(0);
     }
 
     @Test
     @DisplayName("Депозит на несуществующий счёт")
     public void userCanNotDepositUnexistAccount() {
-        int notExistsAccountId = generateRandomAccountId();
+        int notExistsAccountId = getRandomAccountId();
         double amount = RandomUtils.nextDouble(1, MAX_DEPOSIT_AMOUNT);
         CreateUserRequest user = AdminSteps.createUser();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsForbidden("Unauthorized access to account")
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
                 new DepositRequest(notExistsAccountId, amount)
         );
@@ -109,11 +106,14 @@ public class AccountDepositTest extends BaseTest {
         CreateAccountResponse account = UserSteps.createAccount(secondUser);
 
         new CrudRequester(
-                RequestSpecs.authAsUser(firstUser.getUsername(), firstUser.getPassword()),
+                RequestSpecs.authAsUser(firstUser),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsForbidden("Unauthorized access to account")
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
                 new DepositRequest(account.getId(), amount)
         );
+
+        List<TransactionsResponse> transactions = getAllTransactionsByAccountId(secondUser, account.getId());
+        assertThat(transactions.size()).isEqualTo(0);
     }
 }

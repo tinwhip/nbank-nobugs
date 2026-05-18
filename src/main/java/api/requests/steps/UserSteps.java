@@ -10,6 +10,17 @@ import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
 import java.util.List;
+import models.CreateAccountResponse;
+import models.CreateUserRequest;
+import models.DepositRequest;
+import models.TransactionsResponse;
+import requests.skeleton.Endpoint;
+import requests.skeleton.RequestParams;
+import requests.skeleton.requesters.ValidatedCrudRequester;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
+
+import java.util.List;
 
 public class UserSteps {
     private String username;
@@ -25,7 +36,7 @@ public class UserSteps {
 
     public static CreateAccountResponse createAccount(CreateUserRequest user) {
         return new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS,
                 ResponseSpecs.entityWasCreated()
         ).post(null);
@@ -41,7 +52,7 @@ public class UserSteps {
             DepositRequest deposit = new DepositRequest(accountId, partToDeposit);
 
             lastResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                    RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                    RequestSpecs.authAsUser(user),
                     Endpoint.ACCOUNTS_DEPOSIT,
                     ResponseSpecs.requestReturnsOK()
             ).post(deposit);
@@ -54,7 +65,7 @@ public class UserSteps {
 
     public static CreateAccountResponse getAccountById(CreateUserRequest user, long accountId) {
         return new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class).stream()
@@ -62,6 +73,17 @@ public class UserSteps {
                 .findAny().orElseThrow(
                         () -> new RuntimeException("No account with id = %s for customer".formatted(accountId))
                 );
+    }
+
+    public static List<TransactionsResponse> getAllTransactionsByAccountId(CreateUserRequest user, long id) {
+        return new ValidatedCrudRequester<TransactionsResponse>(
+                RequestSpecs.authAsUser(user),
+                Endpoint.ACCOUNT_TRANSACTIONS,
+                ResponseSpecs.requestReturnsOK()
+        ).getAll(
+                RequestParams.params().path("id", id),
+                TransactionsResponse[].class
+        );
     }
 
     public List<CreateAccountResponse> getAllAccounts() {

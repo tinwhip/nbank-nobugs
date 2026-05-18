@@ -8,10 +8,15 @@ import io.restassured.specification.ResponseSpecification;
 import api.models.BaseModel;
 import api.Endpoint;
 import api.HttpRequest;
+import models.BaseModel;
+import requests.skeleton.Endpoint;
+import requests.skeleton.HttpRequest;
+import requests.skeleton.RequestParams;
+import requests.skeleton.interfaces.CrudEndpointInterface;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
 
-public class CrudRequester extends HttpRequest implements CrudEndpointInterface, GetAllEndpointInterface {
+public class CrudRequester extends HttpRequest implements CrudEndpointInterface {
     public CrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
         super(requestSpecification, endpoint, responseSpecification);
     }
@@ -28,10 +33,11 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface,
     }
 
     @Override
-    public ValidatableResponse get(long id) {
+    public ValidatableResponse get(RequestParams requestParams) {
         return given()
                 .spec(requestSpecification)
-                .pathParam("id", id)
+                .pathParams(requestParams.getPathParams())
+                .queryParams(requestParams.getQueryParams())
                 .get(endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
@@ -57,10 +63,11 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface,
     }
 
     @Override
-    public ValidatableResponse delete(long id) {
+    public ValidatableResponse delete(RequestParams requestParams) {
         return given()
                 .spec(requestSpecification)
-                .pathParam("id", id)
+                .pathParams(requestParams.getPathParams())
+                .queryParams(requestParams.getQueryParams())
                 .delete(endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
@@ -70,6 +77,17 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface,
     public ValidatableResponse getAll(Class<?> clazz) {
         return given()
                 .spec(requestSpecification)
+                .get(endpoint.getUrl())
+                .then()
+                .spec(responseSpecification);
+    }
+
+    @Override
+    public ValidatableResponse getAll(RequestParams requestParams, Class<?> clazz) {
+        return given()
+                .spec(requestSpecification)
+                .pathParams(requestParams.getPathParams())
+                .queryParams(requestParams.getQueryParams())
                 .get(endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);

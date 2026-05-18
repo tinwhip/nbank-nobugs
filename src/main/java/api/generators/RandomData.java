@@ -4,6 +4,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
 public class RandomData {
+    private static final String CYRILLIC_LETTERS =
+            "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" +
+                    "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
     private RandomData() {
     }
 
@@ -18,7 +22,11 @@ public class RandomData {
                 + "!%#@";
     }
 
-    public static int generateRandomAccountId() {
+    public static int getRandomAccountId() {
         return RandomUtils.nextInt(1000, 2000);
+    }
+
+    public static String getCyrillicString(int length) {
+        return RandomStringUtils.random(length, CYRILLIC_LETTERS);
     }
 }

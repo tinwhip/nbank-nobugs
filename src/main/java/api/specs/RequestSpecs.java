@@ -9,6 +9,10 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import api.models.LoginUserRequest;
 import api.Endpoint;
+import models.CreateUserRequest;
+import models.LoginUserRequest;
+import requests.skeleton.Endpoint;
+import requests.skeleton.requesters.CrudRequester;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,5 +72,9 @@ public class RequestSpecs {
         }
 
         return userAuthHeader;
+    }
+
+    public static RequestSpecification authAsUser(CreateUserRequest user) {
+        return authAsUser(user.getUsername(), user.getPassword());
     }
 }

@@ -5,6 +5,13 @@ import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import api.BaseTest;
+import generators.RandomData;
+import generators.RandomModelGenerator;
+import models.CreateUserRequest;
+import models.CreateUserResponse;
+import models.UserRole;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,6 +23,10 @@ import api.specs.ResponseSpecs;
 import java.util.stream.Stream;
 
 import static api.models.comparison.ModelAssertions.assertThatModels;
+import static constants.ResponseMessage.*;
+import static models.comparison.ModelAssertions.assertThatModels;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 
 public class CreateUserTest extends BaseTest {
@@ -34,19 +45,22 @@ public class CreateUserTest extends BaseTest {
 
     private static Stream<Arguments> userInvalidData() {
         return Stream.of(
-                Arguments.of(" ", "Password33$", "USER", "username", "Username cannot be blank"),
-                Arguments.of("ab", "Password33$", "USER", "username", "Username must be between 3 and 15 characters"),
-                Arguments.of("abc%", "Password33$", "USER", "username", "Username must contain only letters, digits, dashes, underscores, and dots")
+                Arguments.of(null, RandomData.getPassword(), "username", BLANK_USERNAME.getMessage()),
+                Arguments.of(randomAlphabetic(2), RandomData.getPassword(), "username", USERNAME_MUST_BE_BETWEEN.getMessage()),
+                Arguments.of(randomAlphabetic(3) + "%", RandomData.getPassword(), "username", USERNAME_MUST_CONTAIN_ONLY.getMessage()),
+                Arguments.of(RandomData.getUsername(), null, "password", BLANK_PASSWORD.getMessage()),
+                Arguments.of(RandomData.getUsername(), randomAlphanumeric(1), "password", PASSWORD_MUST_CONTAIN.getMessage())
         );
     }
 
     @MethodSource("userInvalidData")
     @ParameterizedTest
-    public void adminCanNotCreateUserWithInvalidData(String username, String password, String role, String errorKey, String errorValue) {
+    public void adminCanNotCreateUserWithInvalidData(String username, String password, String errorKey, String errorValue) {
+
         CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .username(username)
                 .password(password)
-                .role(role)
+                .role(UserRole.USER.name())
                 .build();
 
         new CrudRequester(

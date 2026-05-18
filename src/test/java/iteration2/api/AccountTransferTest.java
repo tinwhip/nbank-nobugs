@@ -7,6 +7,12 @@ import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
 import api.models.TransferRequest;
 import api.models.TransferResponse;
+import api.BaseTest;
+import constants.ResponseMessage;
+import models.CreateAccountResponse;
+import models.CreateUserRequest;
+import models.TransferRequest;
+import models.TransferResponse;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +24,16 @@ import api.requests.steps.UserSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
+import static constants.TransferTypes.TRANSFER_IN;
+import static constants.TransferTypes.TRANSFER_OUT;
+import static generators.RandomData.getRandomAccountId;
+import static models.comparison.ModelAssertions.assertThatModels;
 import static api.generators.RandomData.generateRandomAccountId;
 import static api.models.comparison.ModelAssertions.assertThatModels;
 import static org.assertj.core.api.Assertions.assertThat;
 import static api.requests.steps.UserSteps.MAX_TRANSFER_AMOUNT;
+import static requests.steps.UserSteps.MAX_TRANSFER_AMOUNT;
+import static requests.steps.UserSteps.getAccountById;
 
 public class AccountTransferTest extends BaseTest {
 
@@ -29,8 +41,6 @@ public class AccountTransferTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Перевод между своими счетами")
     public void userCanTransferMoneyBetweenAccounts(double transferAmount) {
-        String successfulMessage = "Transfer successful";
-
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
         CreateAccountResponse secondAccount = UserSteps.createAccount(user);
@@ -44,19 +54,31 @@ public class AccountTransferTest extends BaseTest {
                 .build();
 
         TransferResponse transferResponse = new ValidatedCrudRequester<TransferResponse>(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_TRANSFER,
                 ResponseSpecs.requestReturnsOK()
         ).post(transferRequest);
+
         assertThatModels(transferRequest, transferResponse).match();
-        assertThat(transferResponse.getMessage()).isEqualTo(successfulMessage);
+        assertThat(transferResponse.getMessage()).isEqualTo(ResponseMessage.TRANSFER_SUCCESSFUL.getMessage());
+
+        firstAccount = getAccountById(user, transferRequest.getSenderAccountId());
+        secondAccount = getAccountById(user, transferRequest.getReceiverAccountId());
+
+        assertThat(firstAccount.getBalance()).isZero();
+        assertThat(firstAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_OUT.name())
+        );
+        assertThat(secondAccount.getBalance()).isEqualTo(transferRequest.getAmount());
+        assertThat(secondAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_IN.name())
+        );
     }
 
     @Test
     @DisplayName("Перевод на чужой счёт")
     public void userCanTransferMoneyToOtherAccounts() {
         double transferAmount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String successfulMessage = "Transfer successful";
 
         CreateUserRequest firstUser = AdminSteps.createUser();
         CreateUserRequest secondUser = AdminSteps.createUser();
@@ -71,20 +93,31 @@ public class AccountTransferTest extends BaseTest {
                 .build();
 
         TransferResponse transferResponse = new ValidatedCrudRequester<TransferResponse>(
-                RequestSpecs.authAsUser(firstUser.getUsername(), firstUser.getPassword()),
+                RequestSpecs.authAsUser(firstUser),
                 Endpoint.ACCOUNTS_TRANSFER,
                 ResponseSpecs.requestReturnsOK()
         ).post(transferRequest);
+
         assertThatModels(transferRequest, transferResponse).match();
-        assertThat(transferResponse.getMessage()).isEqualTo(successfulMessage);
+        assertThat(transferResponse.getMessage()).isEqualTo(ResponseMessage.TRANSFER_SUCCESSFUL.getMessage());
+
+        firstAccount = getAccountById(firstUser, transferRequest.getSenderAccountId());
+        secondAccount = getAccountById(secondUser, transferRequest.getReceiverAccountId());
+
+        assertThat(firstAccount.getBalance()).isZero();
+        assertThat(firstAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_OUT.name())
+        );
+        assertThat(secondAccount.getBalance()).isEqualTo(transferRequest.getAmount());
+        assertThat(secondAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_IN.name())
+        );
     }
 
     @ValueSource(doubles = {-1, 0, MAX_TRANSFER_AMOUNT + 1})
     @ParameterizedTest
     @DisplayName("Трансфер невалидной суммы на свой существующий счёт")
     public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount) {
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
-
         CreateUserRequest user = AdminSteps.createUser();
         CreateAccountResponse firstAccount = UserSteps.createAccount(user);
         CreateAccountResponse secondAccount = UserSteps.createAccount(user);
@@ -98,10 +131,18 @@ public class AccountTransferTest extends BaseTest {
                 .build();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
+
+        firstAccount = getAccountById(user, transferRequest.getSenderAccountId());
+        secondAccount = getAccountById(user, transferRequest.getReceiverAccountId());
+
+        assertThat(firstAccount.getBalance()).isZero();
+        assertThat(firstAccount.getTransactions()).isEmpty();
+        assertThat(secondAccount.getBalance()).isZero();
+        assertThat(secondAccount.getTransactions()).isEmpty();
     }
 
     @Test
@@ -109,55 +150,69 @@ public class AccountTransferTest extends BaseTest {
     public void userCanNotTransferInsufficientMoneyBetweenAccounts() {
         double depositAmount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
         double transferAmount = depositAmount + 1;
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
 
         CreateUserRequest user = AdminSteps.createUser();
-        CreateAccountResponse firstAccount = UserSteps.createAccount(user);
-        CreateAccountResponse secondAccount = UserSteps.createAccount(user);
-        UserSteps.depositAccount(user, firstAccount.getId(), depositAmount);
+        CreateAccountResponse senderAccount = UserSteps.createAccount(user);
+        CreateAccountResponse recieverAccount = UserSteps.createAccount(user);
+        UserSteps.depositAccount(user, senderAccount.getId(), depositAmount);
 
         TransferRequest transferRequest = TransferRequest.builder()
-                .senderAccountId(firstAccount.getId())
-                .receiverAccountId(secondAccount.getId())
+                .senderAccountId(senderAccount.getId())
+                .receiverAccountId(recieverAccount.getId())
                 .amount(transferAmount)
                 .build();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
+
+        senderAccount = getAccountById(user, transferRequest.getSenderAccountId());
+        recieverAccount = getAccountById(user, transferRequest.getReceiverAccountId());
+
+        assertThat(senderAccount.getBalance()).isEqualTo(depositAmount);
+        assertThat(senderAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isNotEqualTo(TRANSFER_OUT.name())
+        );
+        assertThat(recieverAccount.getBalance()).isZero();
+        assertThat(recieverAccount.getTransactions()).isEmpty();
     }
 
     @Test
     @DisplayName("Отсутствие перевода на несуществующий счёт")
     public void userCanNotTransferToNotExistsAccounts() {
-        int notExistsAccountId = generateRandomAccountId();
+        int notExistsReceiverAccountId = getRandomAccountId();
         double amount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String errorMessage = "Invalid transfer: insufficient funds or invalid accounts";
 
         CreateUserRequest user = AdminSteps.createUser();
-        CreateAccountResponse firstAccount = UserSteps.createAccount(user);
-        UserSteps.depositAccount(user, firstAccount.getId(), amount);
+        CreateAccountResponse senderAccount = UserSteps.createAccount(user);
+        UserSteps.depositAccount(user, senderAccount.getId(), amount);
 
         TransferRequest transferRequest = TransferRequest.builder()
-                .senderAccountId(firstAccount.getId())
-                .receiverAccountId(notExistsAccountId)
+                .senderAccountId(senderAccount.getId())
+                .receiverAccountId(notExistsReceiverAccountId)
                 .amount(amount)
                 .build();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(user.getUsername(), user.getPassword()),
+                RequestSpecs.authAsUser(user),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(errorMessage)
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
         ).post(transferRequest);
+
+        senderAccount = getAccountById(user, transferRequest.getSenderAccountId());
+
+        assertThat(senderAccount.getBalance()).isEqualTo(transferRequest.getAmount());
+        assertThat(senderAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isNotEqualTo(TRANSFER_OUT.name())
+        );
     }
 
     @Test
     @DisplayName("Перевод с чужого аккаунта на свой")
     public void userCanNotTransferFromNeSvoyAccount() {
         double amount = RandomUtils.nextDouble(1, MAX_TRANSFER_AMOUNT);
-        String errorMessage = "Unauthorized access to account";
 
         CreateUserRequest firstUser = AdminSteps.createUser();
         CreateUserRequest secondUser = AdminSteps.createUser();
@@ -172,9 +227,19 @@ public class AccountTransferTest extends BaseTest {
                 .build();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(firstUser.getUsername(), firstUser.getPassword()),
+                RequestSpecs.authAsUser(firstUser),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsForbidden(errorMessage)
+                ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(transferRequest);
+
+        firstUserAccount = getAccountById(firstUser, transferRequest.getReceiverAccountId());
+        secondUserAccount = getAccountById(secondUser, transferRequest.getSenderAccountId());
+
+        assertThat(firstUserAccount.getBalance()).isZero();
+        assertThat(firstUserAccount.getTransactions()).isEmpty();
+        assertThat(secondUserAccount.getBalance()).isEqualTo(amount);
+        assertThat(secondUserAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isNotEqualTo(TRANSFER_OUT.name())
+        );
     }
 }
