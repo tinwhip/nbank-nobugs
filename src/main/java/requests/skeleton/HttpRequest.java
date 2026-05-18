@@ -1,15 +1,12 @@
-package requests;
+package requests.skeleton;
 
-import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import lombok.AllArgsConstructor;
-import models.BaseModel;
 
 @AllArgsConstructor
-public abstract class Request<T extends BaseModel> {
+public abstract class HttpRequest {
     protected RequestSpecification requestSpecification;
+    protected Endpoint endpoint;
     protected ResponseSpecification responseSpecification;
-
-    public abstract ValidatableResponse post(T model);
 }

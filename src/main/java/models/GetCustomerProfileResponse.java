@@ -11,11 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateUserResponse extends BaseModel {
-    private long id;
-    private String username;
+public class GetCustomerProfileResponse extends BaseModel {
     private String password;
-    private String name;
     private String role;
+    private String name;
+    private Integer id;
     private List<CreateAccountResponse> accounts;
+    private String username;
 }
