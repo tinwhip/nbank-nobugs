@@ -1,11 +1,12 @@
 package iteration1.api;
 
 import api.models.CreateAccountResponse;
-import api.models.CreateUserRequest;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import common.TestType;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import org.junit.jupiter.api.Test;
 import api.Endpoint;
-import api.requests.steps.AdminSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
@@ -16,18 +17,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CreateAccountTest extends BaseTest {
 
     @Test
+    @UserSession(testType = TestType.API)
     public void userCanCreateAccountTest() {
-        CreateUserRequest user = AdminSteps.createUser();
-
         CreateAccountResponse accountResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(SessionStorage.getUser()),
                 Endpoint.ACCOUNTS,
                 ResponseSpecs.entityWasCreated()
         ).post(null);
 
         //запросить все аккаунты пользователя и проверить, что наш аккаунт там
         List<CreateAccountResponse> accounts = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(SessionStorage.getUser()),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class);

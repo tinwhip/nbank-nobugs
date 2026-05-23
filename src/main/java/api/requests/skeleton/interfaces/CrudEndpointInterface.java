@@ -1,7 +1,7 @@
 package api.requests.skeleton.interfaces;
 
 import api.models.BaseModel;
-import requests.skeleton.RequestParams;
+import api.requests.skeleton.RequestParams;
 
 public interface CrudEndpointInterface {
     Object post(BaseModel model);

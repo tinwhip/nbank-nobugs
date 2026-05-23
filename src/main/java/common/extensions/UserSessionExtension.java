@@ -2,6 +2,7 @@ package common.extensions;
 
 import api.models.CreateUserRequest;
 import api.requests.steps.AdminSteps;
+import common.TestType;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -32,7 +33,9 @@ public class UserSessionExtension implements BeforeEachCallback {
 
             int authAsUser = annotation.auth();
 
-            BasePage.authAsUser(SessionStorage.getUser(authAsUser));
+            if (annotation.testType() == TestType.UI) {
+                BasePage.authAsUser(SessionStorage.getUser(authAsUser));
+            }
         }
     }
 }

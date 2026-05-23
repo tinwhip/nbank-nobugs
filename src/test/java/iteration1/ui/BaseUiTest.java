@@ -14,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 
-@ExtendWith(AdminSessionExtension.class)
-@ExtendWith(UserSessionExtension.class)
 @ExtendWith(BrowserMatchExtension.class)
 public class BaseUiTest extends BaseTest {
     @BeforeAll

@@ -1,6 +1,7 @@
 package api.specs;
 
 import api.configs.Config;
+import api.models.CreateUserRequest;
 import api.requests.skeleton.requesters.CrudRequester;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -9,10 +10,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import api.models.LoginUserRequest;
 import api.Endpoint;
-import models.CreateUserRequest;
-import models.LoginUserRequest;
-import requests.skeleton.Endpoint;
-import requests.skeleton.requesters.CrudRequester;
 
 import java.util.HashMap;
 import java.util.List;

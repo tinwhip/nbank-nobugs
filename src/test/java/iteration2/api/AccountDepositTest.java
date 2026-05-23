@@ -2,31 +2,26 @@ package iteration2.api;
 
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import common.TestType;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import iteration1.api.BaseTest;
 import api.models.CreateAccountResponse;
-import api.models.CreateUserRequest;
 import api.models.DepositRequest;
 import api.models.TransactionsResponse;
-import api.BaseTest;
 import constants.ResponseMessage;
-import models.CreateAccountResponse;
-import models.CreateUserRequest;
-import models.DepositRequest;
-import models.TransactionsResponse;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import api.Endpoint;
-import api.requests.steps.AdminSteps;
-import api.requests.steps.UserSteps;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
 import java.util.List;
 
-import static api.generators.RandomData.generateRandomAccountId;
+import static api.generators.RandomData.getRandomAccountId;
 import static org.assertj.core.api.Assertions.assertThat;
 import static api.requests.steps.UserSteps.MAX_DEPOSIT_AMOUNT;
 
@@ -35,13 +30,13 @@ public class AccountDepositTest extends BaseTest {
     @ValueSource(doubles = {1, MAX_DEPOSIT_AMOUNT - 1, MAX_DEPOSIT_AMOUNT})
     @ParameterizedTest
     @DisplayName("Депозит валидной суммы на свой существующий счёт")
+    @UserSession(testType = TestType.API)
     public void userCanDepositExistAccount(double amount) {
-        CreateUserRequest user = AdminSteps.createUser();
-        CreateAccountResponse account = UserSteps.createAccount(user);
+        CreateAccountResponse account = SessionStorage.getSteps().createAccount();
 
         //закинуть деньги на счёт
         CreateAccountResponse depositAccountResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsOK()
         ).post(
@@ -51,25 +46,25 @@ public class AccountDepositTest extends BaseTest {
         assertThat(depositAccountResponse.getBalance()).isEqualTo(amount);
         assertThat(depositAccountResponse.getTransactions().get(0).getRelatedAccountId()).isEqualTo(account.getId());
 
-        List<TransactionsResponse> transactions = UserSteps.getAllTransactionsByAccountId(user, account.getId());
+        List<TransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsByAccountId(account.getId());
         assertThat(transactions.size()).isEqualTo(1);
         assertThat(transactions.get(0)).isEqualTo(depositAccountResponse.getTransactions().get(0));
 
         //проверить что у пользователя есть транзакция с балансом
-        CreateAccountResponse accountInfo = UserSteps.getAccountById(user, account.getId());
+        CreateAccountResponse accountInfo = SessionStorage.getSteps().getAccountById(account.getId());
         assertThat(accountInfo.getBalance()).isEqualTo(amount);
     }
 
     @ValueSource(doubles = {0, -1, MAX_DEPOSIT_AMOUNT + 1})
     @ParameterizedTest
     @DisplayName("Депозит невалидной суммы на свой существующий счёт")
+    @UserSession(testType = TestType.API)
     public void userCanNotDepositExistAccountWithBadValue(double amount) {
-        CreateUserRequest user = AdminSteps.createUser();
-        CreateAccountResponse account = UserSteps.createAccount(user);
+        CreateAccountResponse account = SessionStorage.getSteps().createAccount();
 
         //закинуть деньги на счёт
         new CrudRequester(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_ACCOUNT_OR_AMOUNT.getMessage())
         ).post(
@@ -77,19 +72,19 @@ public class AccountDepositTest extends BaseTest {
         );
 
         //проверить, что у аккаунта не отображается транзакция
-        List<TransactionsResponse> transactions = getAllTransactionsByAccountId(user, account.getId());
+        List<TransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsByAccountId(account.getId());
         assertThat(transactions.size()).isEqualTo(0);
     }
 
     @Test
     @DisplayName("Депозит на несуществующий счёт")
+    @UserSession(testType = TestType.API)
     public void userCanNotDepositUnexistAccount() {
         int notExistsAccountId = getRandomAccountId();
         double amount = RandomUtils.nextDouble(1, MAX_DEPOSIT_AMOUNT);
-        CreateUserRequest user = AdminSteps.createUser();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
@@ -99,21 +94,20 @@ public class AccountDepositTest extends BaseTest {
 
     @Test
     @DisplayName("Депозит на чужой счёт")
+    @UserSession(testType = TestType.API, value = 2)
     public void userCanNotDepositOtherAccount() {
         double amount = RandomUtils.nextDouble(1, MAX_DEPOSIT_AMOUNT);
-        CreateUserRequest firstUser = AdminSteps.createUser();
-        CreateUserRequest secondUser = AdminSteps.createUser();
-        CreateAccountResponse account = UserSteps.createAccount(secondUser);
+        CreateAccountResponse account = SessionStorage.getSteps(2).createAccount();
 
         new CrudRequester(
-                RequestSpecs.authAsUser(firstUser),
+                RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsForbidden(ResponseMessage.UNAUTH_ACCESS_TO_ACCOUNT.getMessage())
         ).post(
                 new DepositRequest(account.getId(), amount)
         );
 
-        List<TransactionsResponse> transactions = getAllTransactionsByAccountId(secondUser, account.getId());
+        List<TransactionsResponse> transactions = SessionStorage.getSteps(2).getAllTransactionsByAccountId(account.getId());
         assertThat(transactions.size()).isEqualTo(0);
     }
 }

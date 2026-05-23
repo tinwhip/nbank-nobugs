@@ -2,23 +2,13 @@ package api.requests.steps;
 
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
-import api.models.CreateUserResponse;
 import api.models.DepositRequest;
 import api.Endpoint;
+import api.models.TransactionsResponse;
+import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
-
-import java.util.List;
-import models.CreateAccountResponse;
-import models.CreateUserRequest;
-import models.DepositRequest;
-import models.TransactionsResponse;
-import requests.skeleton.Endpoint;
-import requests.skeleton.RequestParams;
-import requests.skeleton.requesters.ValidatedCrudRequester;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
 
 import java.util.List;
 
@@ -34,15 +24,15 @@ public class UserSteps {
     public static final double MAX_DEPOSIT_AMOUNT = 5_000;
     public static final double MAX_TRANSFER_AMOUNT = 10_000;
 
-    public static CreateAccountResponse createAccount(CreateUserRequest user) {
+    public CreateAccountResponse createAccount() {
         return new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(username, password),
                 Endpoint.ACCOUNTS,
                 ResponseSpecs.entityWasCreated()
         ).post(null);
     }
 
-    public static CreateAccountResponse depositAccount(CreateUserRequest user, long accountId, double amount) {
+    public CreateAccountResponse depositAccount(long accountId, double amount) {
         double remainingAmount = amount;
 
         CreateAccountResponse lastResponse = null;
@@ -52,7 +42,7 @@ public class UserSteps {
             DepositRequest deposit = new DepositRequest(accountId, partToDeposit);
 
             lastResponse = new ValidatedCrudRequester<CreateAccountResponse>(
-                    RequestSpecs.authAsUser(user),
+                    RequestSpecs.authAsUser(username, password),
                     Endpoint.ACCOUNTS_DEPOSIT,
                     ResponseSpecs.requestReturnsOK()
             ).post(deposit);
@@ -63,9 +53,9 @@ public class UserSteps {
         return lastResponse;
     }
 
-    public static CreateAccountResponse getAccountById(CreateUserRequest user, long accountId) {
+    public CreateAccountResponse getAccountById(long accountId) {
         return new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(username, password),
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class).stream()
@@ -75,9 +65,9 @@ public class UserSteps {
                 );
     }
 
-    public static List<TransactionsResponse> getAllTransactionsByAccountId(CreateUserRequest user, long id) {
+    public List<TransactionsResponse> getAllTransactionsByAccountId(long id) {
         return new ValidatedCrudRequester<TransactionsResponse>(
-                RequestSpecs.authAsUser(user),
+                RequestSpecs.authAsUser(username, password),
                 Endpoint.ACCOUNT_TRANSACTIONS,
                 ResponseSpecs.requestReturnsOK()
         ).getAll(

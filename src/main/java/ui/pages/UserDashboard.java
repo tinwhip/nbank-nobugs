@@ -7,9 +7,9 @@ import lombok.Getter;
 import static com.codeborne.selenide.Selenide.$;
 
 @Getter
-public class UserDashboard extends BasePage<UserDashboard> {
+public class UserDashboard extends AuthorizedPage<UserDashboard> {
     private SelenideElement welcomeText = $(Selectors.byClassName("welcome-text"));
-    private SelenideElement createNewAccount = $(Selectors.byText("➕ Create New Account"));
+    private SelenideElement createNewAccount = $(Selectors.byText("➕ Create New AccountAnnotation"));
 
     @Override
     public String url() {

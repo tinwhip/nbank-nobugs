@@ -1,4 +1,4 @@
-package requests.skeleton;
+package api.requests.skeleton;
 
 import lombok.Getter;
 

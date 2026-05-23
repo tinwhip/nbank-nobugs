@@ -1,18 +1,13 @@
 package api.requests.skeleton.requesters;
 
+import api.Endpoint;
+import api.HttpRequest;
+import api.models.BaseModel;
+import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.interfaces.CrudEndpointInterface;
-import api.requests.skeleton.interfaces.GetAllEndpointInterface;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import api.models.BaseModel;
-import api.Endpoint;
-import api.HttpRequest;
-import models.BaseModel;
-import requests.skeleton.Endpoint;
-import requests.skeleton.HttpRequest;
-import requests.skeleton.RequestParams;
-import requests.skeleton.interfaces.CrudEndpointInterface;
 
 import static io.restassured.RestAssured.given;
 

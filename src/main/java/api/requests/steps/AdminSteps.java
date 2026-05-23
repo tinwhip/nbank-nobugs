@@ -7,6 +7,7 @@ import api.Endpoint;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import common.storage.SessionStorage;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class AdminSteps {
                 ResponseSpecs.entityWasCreated()
         ).post(userRequest);
 
+        SessionStorage.addUsers(List.of(userRequest));
         return userRequest;
     }
 

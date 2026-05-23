@@ -1,17 +1,12 @@
 package iteration1.api;
 
+import api.generators.RandomData;
 import api.generators.RandomModelGenerator;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
+import api.models.UserRole;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
-import api.BaseTest;
-import generators.RandomData;
-import generators.RandomModelGenerator;
-import models.CreateUserRequest;
-import models.CreateUserResponse;
-import models.UserRole;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,7 +19,6 @@ import java.util.stream.Stream;
 
 import static api.models.comparison.ModelAssertions.assertThatModels;
 import static constants.ResponseMessage.*;
-import static models.comparison.ModelAssertions.assertThatModels;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 

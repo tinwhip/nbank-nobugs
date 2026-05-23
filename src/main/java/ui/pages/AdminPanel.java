@@ -11,7 +11,7 @@ import java.util.List;
 import static com.codeborne.selenide.Selenide.$;
 
 @Getter
-public class AdminPanel extends BasePage<AdminPanel> {
+public class AdminPanel extends AuthorizedPage<AdminPanel> {
     private SelenideElement adminPanelText = $(Selectors.byText("Admin Panel"));
     private SelenideElement addUserButton = $(Selectors.byText("Add User"));
 

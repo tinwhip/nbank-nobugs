@@ -1,13 +1,11 @@
 package iteration1.api;
 
-import api.models.CreateUserRequest;
-import api.models.CreateUserResponse;
-import api.models.LoginUserRequest;
+import api.models.*;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
-import api.BaseTest;
-import constants.AdminCredentials;
-import models.*;
+import common.TestType;
+import common.annotations.UserSession;
+import common.storage.SessionStorage;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import api.Endpoint;
@@ -24,8 +22,8 @@ public class LoginUserTest extends BaseTest {
     @Test
     public void adminCanGenerateAuthTokenTest() {
         LoginUserRequest userRequest = LoginUserRequest.builder()
-                .username(AdminCredentials.CREDENTIALS.getUsername())
-                .password(AdminCredentials.CREDENTIALS.getPassword())
+                .username(CreateUserRequest.getAdmin().getUsername())
+                .password(CreateUserRequest.getAdmin().getPassword())
                 .build();
 
         LoginUserResponse authResponse = new ValidatedCrudRequester<LoginUserResponse>(RequestSpecs.unauthSpec(),
@@ -37,8 +35,9 @@ public class LoginUserTest extends BaseTest {
     }
 
     @Test
+    @UserSession(testType = TestType.API)
     public void userCanGenerateAuthTokenTest() {
-        CreateUserRequest user = AdminSteps.createUser();
+        CreateUserRequest user = SessionStorage.getUser();
 
         new CrudRequester(
                 RequestSpecs.unauthSpec(),

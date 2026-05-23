@@ -1,5 +1,6 @@
 package common.storage;
 
+import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
 import api.requests.steps.UserSteps;
 
@@ -11,6 +12,7 @@ public class SessionStorage {
     private static final SessionStorage INSTANCE = new SessionStorage();
 
     private final LinkedHashMap<CreateUserRequest, UserSteps> userStepsMap = new LinkedHashMap<>();
+    private final LinkedHashMap<String, CreateAccountResponse> accountsMap = new LinkedHashMap<>();
 
     private SessionStorage() {}
 
@@ -18,6 +20,10 @@ public class SessionStorage {
         for (CreateUserRequest user : users) {
             INSTANCE.userStepsMap.put(user, new UserSteps(user.getUsername(), user.getPassword()));
         }
+    }
+
+    public static void addAccount(String accountName, CreateAccountResponse account) {
+            INSTANCE.accountsMap.put(accountName, account);
     }
 
     /**
@@ -39,6 +45,10 @@ public class SessionStorage {
 
     public static UserSteps getSteps() {
         return getSteps(1);
+    }
+
+    public static CreateAccountResponse getAccount(String accountName) {
+        return INSTANCE.accountsMap.get(accountName);
     }
 
     public static void clear() {

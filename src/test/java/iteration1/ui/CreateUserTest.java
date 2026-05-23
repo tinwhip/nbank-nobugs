@@ -8,7 +8,7 @@ import api.requests.steps.AdminSteps;
 import common.annotations.AdminSession;
 import org.junit.jupiter.api.Test;
 import ui.pages.AdminPanel;
-import ui.pages.BankAlert;
+import constants.BankAlert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
