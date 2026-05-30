@@ -2,5 +2,5 @@ package constants;
 
 
 public enum TransferTypes {
-    TRANSFER_OUT, TRANSFER_IN
+    TRANSFER_OUT, TRANSFER_IN, DEPOSIT
 }

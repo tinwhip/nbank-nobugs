@@ -15,8 +15,9 @@ import java.util.function.Function;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.switchTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ui.utils.ElementMapper.mapElements;
 
-public abstract class BasePage<T extends BasePage> {
+public abstract class BasePage<T extends BasePage<T>> {
     protected SelenideElement usernameInput = $(Selectors.byAttribute("placeholder", "Username"));
     protected SelenideElement passwordInput = $(Selectors.byAttribute("placeholder", "Password"));
 
@@ -47,8 +48,7 @@ public abstract class BasePage<T extends BasePage> {
         authAsUser(createUserRequest.getUsername(), createUserRequest.getPassword());
     }
 
-    //ElementCollection -> List<BaseElement>
     protected <T extends BaseElement> List<T> generatePageElements(ElementsCollection elementsCollection, Function<SelenideElement, T> constructor) {
-        return elementsCollection.stream().map(constructor).toList();
+        return mapElements(elementsCollection, constructor);
     }
 }

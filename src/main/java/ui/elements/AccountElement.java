@@ -2,7 +2,6 @@ package ui.elements;
 
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
-import org.openqa.selenium.By;
 
 @Getter
 public class AccountElement extends BaseElement {

@@ -4,6 +4,7 @@ import api.models.CreateAccountResponse;
 import common.TestType;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
+import constants.BankAlert;
 import iteration1.ui.BaseUiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import ui.elements.AccountElement;
 import ui.pages.DepositMoney;
 
-import java.util.Locale;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import static api.generators.RandomData.getRandomDouble;
 import static api.requests.steps.UserSteps.MAX_DEPOSIT_AMOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static constants.BankAlert.*;
@@ -34,16 +35,11 @@ public class AccountDepositTest extends BaseUiTest {
                 .open()
                 .depositMoneyToAccount(account.getId(), amount)
                 .checkAlertMessageAndAccept(
-                        String.format(
-                                Locale.US,
-                                DEPOSIT_SUCCESSFULLY.getMessage(),
-                                amount,
-                                account.getAccountNumber()
-                        )
+                        BankAlert.getFormattedMessageWithDouble(DEPOSIT_SUCCESSFULLY, amount, account.getAccountNumber())
                 )
                 .open();
 
-        AccountElement uiAccount = depositMoney.getAllAccounts().get(0);
+        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
         assertThat(uiAccount.getBalance()).isEqualTo(amount);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
@@ -69,7 +65,7 @@ public class AccountDepositTest extends BaseUiTest {
                 .checkAlertMessageAndAccept(alert)
                 .open();
 
-        AccountElement uiAccount = depositMoney.getAllAccounts().get(0);
+        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
         assertThat(uiAccount.getBalance()).isEqualTo(0);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
@@ -80,17 +76,17 @@ public class AccountDepositTest extends BaseUiTest {
     @DisplayName("Депозит без выбора аккаунта")
     @UserSession(testType = TestType.UI)
     public void userCanNotDepositWithoutAccount() {
-        double amount = new Random().nextDouble(0, MAX_DEPOSIT_AMOUNT);
+        double amount = getRandomDouble(0, MAX_DEPOSIT_AMOUNT);
         SessionStorage.getSteps().createAccount();
         DepositMoney depositMoney = new DepositMoney().open();
 
-        depositMoney.getAmountInput().sendKeys(String.valueOf(amount));
+        depositMoney.getAmountInput().enter(String.valueOf(amount));
         depositMoney.getDepositButton().click();
 
         depositMoney.checkAlertMessageAndAccept(PLEASE_SELECT_ACCOUNT.getMessage())
                 .open();
 
-        AccountElement uiAccount = depositMoney.getAllAccounts().get(0);
+        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
         assertThat(uiAccount.getBalance()).isEqualTo(0);
 
         SessionStorage.getSteps().getAllAccounts().forEach(

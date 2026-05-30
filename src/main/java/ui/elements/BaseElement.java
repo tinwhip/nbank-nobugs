@@ -1,8 +1,16 @@
 package ui.elements;
 
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import lombok.Getter;
 import org.openqa.selenium.By;
 
+import java.util.List;
+import java.util.function.Function;
+
+import static ui.utils.ElementMapper.mapElements;
+
+@Getter
 public abstract class BaseElement {
     protected final SelenideElement element;
 
@@ -18,11 +26,15 @@ public abstract class BaseElement {
         return element.find(cssSelector);
     }
 
-    protected SelenideElement findAll(By selector) {
-        return element.find(selector);
+    protected ElementsCollection findAll(By selector) {
+        return element.findAll(selector);
     }
 
-    protected SelenideElement findAll(String cssSelector) {
-        return element.find(cssSelector);
+    protected ElementsCollection findAll(String cssSelector) {
+        return element.findAll(cssSelector);
+    }
+
+    protected <T extends BaseElement> List<T> generateElements(ElementsCollection elementsCollection, Function<SelenideElement, T> constructor) {
+        return mapElements(elementsCollection, constructor);
     }
 }

@@ -26,17 +26,8 @@ import static org.apache.commons.lang3.RandomStringUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ChangeNameTest extends BaseTest {
-    private static final String VALID_NAME_PLACEHOLDER = "%s %s";
-    private static final String INVALID_NAME_PLACEHOLDER = "%s %s %s";
 
-    static Stream<String> validNameProvider() {
-        return Stream.of(
-                VALID_NAME_PLACEHOLDER.formatted(getCyrillicString(5), getCyrillicString(5)),
-                VALID_NAME_PLACEHOLDER.formatted(randomAlphabetic(5), randomAlphabetic(5))
-        );
-    }
-
-    @MethodSource("validNameProvider")
+    @MethodSource("testdataproviders.ChangeNameDataProvider#validNameProvider")
     @ParameterizedTest
     @DisplayName("Изменение имени пользователя на валидное значение")
     @UserSession(testType = TestType.API)
@@ -47,34 +38,17 @@ public class ChangeNameTest extends BaseTest {
                         Endpoint.UPDATE_CUSTOMER_PROFILE,
                         ResponseSpecs.requestReturnsOK()
                 ).update(new CustomerProfileRequest(name));
+
         assertThat(updateCustomerProfileResponse.getCustomer().getName()).isEqualTo(name);
         assertThat(updateCustomerProfileResponse.getMessage()).isEqualTo(
                 ResponseMessage.PROFILE_UPDATED_SUCCESSFULLY.getMessage()
         );
 
-        GetCustomerProfileResponse getCustomerProfileResponse =
-                new ValidatedCrudRequester<GetCustomerProfileResponse>(
-                        RequestSpecs.authAsUser(SessionStorage.getUser()),
-                        Endpoint.GET_CUSTOMER_PROFILE,
-                        ResponseSpecs.requestReturnsOK()
-                ).get();
+        GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(name);
     }
 
-    static Stream<String> invalidNameProvider() {
-        return Stream.of(
-                INVALID_NAME_PLACEHOLDER.formatted(
-                        getCyrillicString(5), getCyrillicString(5), getCyrillicString(5)
-                ),
-                INVALID_NAME_PLACEHOLDER.formatted(
-                        randomAlphabetic(5), randomAlphabetic(5), randomAlphabetic(5)
-                ),
-                VALID_NAME_PLACEHOLDER.formatted(randomAlphanumeric(5),randomAlphanumeric(5)),
-                VALID_NAME_PLACEHOLDER.formatted(randomNumeric(5), randomNumeric(5))
-        );
-    }
-
-    @MethodSource("invalidNameProvider")
+    @MethodSource("testdataproviders.ChangeNameDataProvider#invalidNameProvider")
     @ParameterizedTest
     @DisplayName("Невозможность изменения имени пользователя на невалидное значение")
     @UserSession(testType = TestType.API)
@@ -85,12 +59,8 @@ public class ChangeNameTest extends BaseTest {
                 ResponseSpecs.requestReturnsBadRequest()
         ).update(new CustomerProfileRequest(name));
 
-        GetCustomerProfileResponse getCustomerProfileResponse =
-                new ValidatedCrudRequester<GetCustomerProfileResponse>(
-                        RequestSpecs.authAsUser(SessionStorage.getUser()),
-                        Endpoint.GET_CUSTOMER_PROFILE,
-                        ResponseSpecs.requestReturnsOK()
-                ).get();
+        GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isNotEqualTo(name);
     }
+
 }

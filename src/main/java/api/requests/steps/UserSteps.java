@@ -1,14 +1,12 @@
 package api.requests.steps;
 
-import api.models.CreateAccountResponse;
-import api.models.CreateUserRequest;
-import api.models.DepositRequest;
+import api.models.*;
 import api.Endpoint;
-import api.models.TransactionsResponse;
 import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import common.storage.SessionStorage;
 
 import java.util.List;
 
@@ -82,5 +80,35 @@ public class UserSteps {
                 Endpoint.CUSTOMER_ACCOUNTS,
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class);
+    }
+
+    public TransferResponse transferBetweenAccounts(Long senderAccountId, Long receiverAccountId, double transferAmount) {
+        TransferRequest transferRequest = TransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(receiverAccountId)
+                .amount(transferAmount)
+                .build();
+
+        return new ValidatedCrudRequester<TransferResponse>(
+                RequestSpecs.authAsUser(username, password),
+                Endpoint.ACCOUNTS_TRANSFER,
+                ResponseSpecs.requestReturnsOK()
+        ).post(transferRequest);
+    }
+
+    public GetCustomerProfileResponse getProfileInfo() {
+        return new ValidatedCrudRequester<GetCustomerProfileResponse>(
+                RequestSpecs.authAsUser(username, password),
+                Endpoint.GET_CUSTOMER_PROFILE,
+                ResponseSpecs.requestReturnsOK()
+        ).get();
+    }
+
+    public UpdateCustomerProfileResponse changeProfileName(String name) {
+        return new ValidatedCrudRequester<UpdateCustomerProfileResponse>(
+                        RequestSpecs.authAsUser(username, password),
+                        Endpoint.UPDATE_CUSTOMER_PROFILE,
+                        ResponseSpecs.requestReturnsOK()
+                ).update(new CustomerProfileRequest(name));
     }
 }

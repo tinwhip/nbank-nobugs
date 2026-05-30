@@ -8,6 +8,8 @@ import ui.pages.AdminPanel;
 import ui.pages.LoginPage;
 import ui.pages.UserDashboard;
 
+import static constants.DefaultProfileName.DEFAULT_PROFILE_NAME;
+
 public class LoginUserTest extends BaseUiTest {
     @Test
     public void adminCanLoginWithCorrectDataTest() {
@@ -26,6 +28,8 @@ public class LoginUserTest extends BaseUiTest {
         new LoginPage().open()
                 .login(user.getUsername(), user.getPassword())
                 .getPage(UserDashboard.class)
-                .getWelcomeText().shouldBe(Condition.visible).shouldHave(Condition.text("Welcome, noname!"));
+                .getWelcomeText().shouldBe(Condition.visible).shouldHave(Condition.text(
+                        UserDashboard.WELCOME_TEXT.formatted(DEFAULT_PROFILE_NAME.getDefaultNameValue())
+                ));
     }
 }
