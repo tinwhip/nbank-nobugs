@@ -5,6 +5,7 @@ import com.codeborne.selenide.SelenideElement;
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.$;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AccountSelector extends BaseElement {
 
@@ -26,6 +27,17 @@ public class AccountSelector extends BaseElement {
     public List<AccountElement> getAllAccounts() {
         element.click();
         return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
+    }
+
+    public AccountSelector checkAccountHasBalance(Long accountId, double amount) {
+        assertThat(
+                getAllAccounts().stream()
+                        .filter(account -> account.getId() == accountId)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Account id %d not found".formatted(accountId)))
+                        .getBalance()
+        ).isEqualTo(amount);
+        return this;
     }
 
 }

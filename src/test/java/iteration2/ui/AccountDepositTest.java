@@ -31,16 +31,14 @@ public class AccountDepositTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     public void userCanDepositToExistAccount(double amount) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
-        DepositMoney depositMoney = new DepositMoney()
-                .open()
+         new DepositMoney().open()
                 .depositMoneyToAccount(account.getId(), amount)
                 .checkAlertMessageAndAccept(
                         BankAlert.getFormattedMessageWithDouble(DEPOSIT_SUCCESSFULLY, amount, account.getAccountNumber())
                 )
-                .open();
-
-        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
-        assertThat(uiAccount.getBalance()).isEqualTo(amount);
+                .open()
+                .getAccountSelector()
+                .checkAccountHasBalance(account.getId(), amount);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
         assertThat(balance).isEqualTo(amount);
@@ -59,14 +57,12 @@ public class AccountDepositTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     public void userCanNotDepositExistAccountWithBadValue(double amount, String alert) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
-        DepositMoney depositMoney = new DepositMoney()
-                .open()
+        new DepositMoney().open()
                 .depositMoneyToAccount(account.getId(), amount)
                 .checkAlertMessageAndAccept(alert)
-                .open();
-
-        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
-        assertThat(uiAccount.getBalance()).isEqualTo(0);
+                .open()
+                .getAccountSelector()
+                .checkAccountHasBalance(account.getId(), amount);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
         assertThat(balance).isEqualTo(0);
@@ -77,17 +73,15 @@ public class AccountDepositTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     public void userCanNotDepositWithoutAccount() {
         double amount = getRandomDouble(0, MAX_DEPOSIT_AMOUNT);
-        SessionStorage.getSteps().createAccount();
+        CreateAccountResponse account = SessionStorage.getSteps().createAccount();
         DepositMoney depositMoney = new DepositMoney().open();
 
         depositMoney.getAmountInput().enter(String.valueOf(amount));
         depositMoney.getDepositButton().click();
 
         depositMoney.checkAlertMessageAndAccept(PLEASE_SELECT_ACCOUNT.getMessage())
-                .open();
-
-        AccountElement uiAccount = depositMoney.getAccountSelector().getAllAccounts().get(0);
-        assertThat(uiAccount.getBalance()).isEqualTo(0);
+                .open().getAccountSelector()
+                .checkAccountHasBalance(account.getId(), 0);
 
         SessionStorage.getSteps().getAllAccounts().forEach(
                 createdAccount -> assertThat(createdAccount.getBalance()).isEqualTo(0)
