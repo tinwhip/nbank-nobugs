@@ -62,7 +62,7 @@ public class AccountDepositTest extends BaseUiTest {
                 .checkAlertMessageAndAccept(alert)
                 .open()
                 .getAccountSelector()
-                .checkAccountHasBalance(account.getId(), amount);
+                .checkAccountHasBalance(account.getId(), 0);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
         assertThat(balance).isEqualTo(0);

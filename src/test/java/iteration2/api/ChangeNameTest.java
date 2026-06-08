@@ -56,7 +56,7 @@ public class ChangeNameTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(SessionStorage.getUser()),
                 Endpoint.UPDATE_CUSTOMER_PROFILE,
-                ResponseSpecs.requestReturnsBadRequest()
+                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.NAME_MUST_CONTAIN_TWO_WORDS.getMessage())
         ).update(new CustomerProfileRequest(name));
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();

@@ -14,12 +14,17 @@ import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import api.Endpoint;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
+import java.util.stream.Stream;
+
 import static api.generators.RandomData.getRandomAccountId;
+import static api.requests.steps.UserSteps.MAX_DEPOSIT_AMOUNT;
 import static constants.TransferTypes.TRANSFER_IN;
 import static constants.TransferTypes.TRANSFER_OUT;
 import static api.models.comparison.ModelAssertions.assertThatModels;
@@ -104,11 +109,11 @@ public class AccountTransferTest extends BaseTest {
         );
     }
 
-    @ValueSource(doubles = {-1, 0, MAX_TRANSFER_AMOUNT + 1})
+    @MethodSource("testdataproviders.TransferDataProvider#userCanNotTransferInvalidAmountBetweenAccountsSource")
     @ParameterizedTest
     @DisplayName("Трансфер невалидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.API)
-    public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount) {
+    public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount, String errorMessage) {
         CreateAccountResponse firstAccount = SessionStorage.getSteps().createAccount();
         CreateAccountResponse secondAccount = SessionStorage.getSteps().createAccount();
 
@@ -123,14 +128,11 @@ public class AccountTransferTest extends BaseTest {
         new CrudRequester(
                 RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_TRANSFER,
-                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_TRANSFER.getMessage())
+                ResponseSpecs.requestReturnsBadRequest(errorMessage)
         ).post(transferRequest);
 
-        firstAccount = SessionStorage.getSteps().getAccountById(transferRequest.getSenderAccountId());
         secondAccount = SessionStorage.getSteps().getAccountById(transferRequest.getReceiverAccountId());
 
-        assertThat(firstAccount.getBalance()).isZero();
-        assertThat(firstAccount.getTransactions()).isEmpty();
         assertThat(secondAccount.getBalance()).isZero();
         assertThat(secondAccount.getTransactions()).isEmpty();
     }

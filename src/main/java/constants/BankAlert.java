@@ -10,7 +10,7 @@ import java.util.Locale;
 public enum BankAlert {
     USER_CREATED_SUCCESSFULLY("✅ User created successfully!"),
     USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS("Username must be between 3 and 15 characters"),
-    NEW_ACCOUNT_CREATED("✅ New AccountAnnotation Created! AccountAnnotation Number: "),
+    NEW_ACCOUNT_CREATED("✅ New Account Created! Account Number: "),
 
     DEPOSIT_SUCCESSFULLY("✅ Successfully deposited $%.1f to account %s!"),
     ENTER_A_VALID_AMOUNT("❌ Please enter a valid amount."),
