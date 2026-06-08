@@ -15,6 +15,7 @@ import api.Endpoint;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static api.models.comparison.ModelAssertions.assertThatModels;
@@ -39,17 +40,17 @@ public class CreateUserTest extends BaseTest {
 
     private static Stream<Arguments> userInvalidData() {
         return Stream.of(
-                Arguments.of(null, RandomData.getPassword(), "username", BLANK_USERNAME.getMessage()),
-                Arguments.of(randomAlphabetic(2), RandomData.getPassword(), "username", USERNAME_MUST_BE_BETWEEN.getMessage()),
-                Arguments.of(randomAlphabetic(3) + "%", RandomData.getPassword(), "username", USERNAME_MUST_CONTAIN_ONLY.getMessage()),
-                Arguments.of(RandomData.getUsername(), null, "password", BLANK_PASSWORD.getMessage()),
-                Arguments.of(RandomData.getUsername(), randomAlphanumeric(1), "password", PASSWORD_MUST_CONTAIN.getMessage())
+                Arguments.of(null, RandomData.getPassword(), "username", List.of(BLANK_USERNAME.getMessage())),
+                Arguments.of(randomAlphabetic(2), RandomData.getPassword(), "username", List.of(USERNAME_MUST_BE_BETWEEN.getMessage())),
+                Arguments.of(randomAlphabetic(3) + "%", RandomData.getPassword(), "username", List.of(USERNAME_MUST_CONTAIN_ONLY.getMessage())),
+                Arguments.of(RandomData.getUsername(), null, "password", List.of(BLANK_PASSWORD.getMessage())),
+                Arguments.of(RandomData.getUsername(), randomAlphanumeric(1), "password", List.of(PASSWORD_MUST_CONTAIN.getMessage()))
         );
     }
 
     @MethodSource("userInvalidData")
     @ParameterizedTest
-    public void adminCanNotCreateUserWithInvalidData(String username, String password, String errorKey, String errorValue) {
+    public void adminCanNotCreateUserWithInvalidData(String username, String password, String errorKey, List<String> errorValue) {
 
         CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .username(username)

@@ -6,10 +6,13 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.utils.RetryUtils;
 import org.openqa.selenium.Alert;
 import ui.elements.BaseElement;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.codeborne.selenide.Selenide.$;
@@ -32,9 +35,22 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
 
     public T checkAlertMessageAndAccept(String bankAlert) {
-        Alert alert = switchTo().alert();
+        Alert alert = RetryUtils.retry(
+                () -> {
+                    try {
+                        return switchTo().alert(Duration.ofSeconds(3));
+                    } catch (Throwable e) {
+                        return null;
+                    }
+                },
+                Objects::nonNull,
+                10,
+                4_000
+        );
+
         assertThat(alert.getText()).contains(bankAlert);
         alert.accept();
+
         return (T) this;
     }
 

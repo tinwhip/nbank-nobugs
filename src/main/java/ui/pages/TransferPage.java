@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.openqa.selenium.By;
 import ui.elements.*;
 
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 
 @Getter
@@ -67,7 +68,7 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
         recipientAccountNumberInput.enter(recipientAccountNumber);
         enterAmount.enter(String.valueOf(amount));
         confirmDetailsButton.confirm();
-        sendTransferButton.click();
+        sendTransferButton.should(clickable).click();
         return this;
     }
 

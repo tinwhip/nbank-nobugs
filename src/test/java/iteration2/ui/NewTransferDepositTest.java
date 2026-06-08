@@ -10,6 +10,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ui.pages.TransferPage;
 
@@ -102,11 +103,11 @@ public class NewTransferDepositTest extends BaseUiTest {
         );
     }
 
-    @ValueSource(doubles = {-1, 0, MAX_TRANSFER_AMOUNT + 1})
+    @MethodSource("testdataproviders.TransferDataProvider#userCanNotTransferInvalidAmountBetweenAccountsSource")
     @ParameterizedTest
     @DisplayName("Трансфер невалидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.UI)
-    public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount) {
+    public void userCanNotTransferInvalidAmountBetweenAccounts(double transferAmount, String message) {
         CreateAccountResponse sendAccount = SessionStorage.getSteps().createAccount();
         CreateAccountResponse receiveAccount = SessionStorage.getSteps().createAccount();
         String recipientName = SessionStorage.getUser().getUsername();
@@ -121,13 +122,10 @@ public class NewTransferDepositTest extends BaseUiTest {
                         recipientAccountNumber,
                         transferAmount
                 )
-                .checkAlertMessageAndAccept(INVALID_TRANSFER.getMessage());
+                .checkAlertMessageAndAccept(message);
 
-        sendAccount = SessionStorage.getSteps().getAccountById(sendAccount.getId());
         receiveAccount = SessionStorage.getSteps().getAccountById(receiveAccount.getId());
 
-        assertThat(sendAccount.getBalance()).isZero();
-        assertThat(sendAccount.getTransactions()).isEmpty();
         assertThat(receiveAccount.getBalance()).isZero();
         assertThat(receiveAccount.getTransactions()).isEmpty();
     }
@@ -183,7 +181,7 @@ public class NewTransferDepositTest extends BaseUiTest {
     }
 
     @Test
-    @DisplayName("Отсутствие перевода без Recipient Name")
+    @DisplayName("Перевод без Recipient Name")
     @UserSession(testType = TestType.UI)
     public void userCanNotTransferWithoutRecipientName() {
         double amount = getRandomDouble(1, MAX_TRANSFER_AMOUNT);
@@ -198,13 +196,23 @@ public class NewTransferDepositTest extends BaseUiTest {
                 .enterAmount(amount)
                 .confirmDetails()
                 .sendTransfer()
-                .checkAlertMessageAndAccept(FILL_ALL_FIELDS_AND_CONFIRM.getMessage());
+                .checkAlertMessageAndAccept(
+                        BankAlert.getFormattedMessageWithDouble(
+                                TRANSFER_SUCCESSFULLY, amount, receiverAccount.getAccountNumber()
+                        )
+                );
 
         senderAccount = SessionStorage.getSteps().getAccountById(senderAccount.getId());
         receiverAccount = SessionStorage.getSteps().getAccountById(receiverAccount.getId());
 
-        assertThat(senderAccount.getBalance()).isEqualTo(amount);
-        assertThat(receiverAccount.getBalance()).isZero();
+        assertThat(senderAccount.getBalance()).isZero();
+        assertThat(senderAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_OUT.name())
+        );
+        assertThat(receiverAccount.getBalance()).isEqualTo(amount);
+        assertThat(receiverAccount.getTransactions()).anySatisfy(
+                transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_IN.name())
+        );
     }
 
     @Test

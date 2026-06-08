@@ -6,9 +6,10 @@ import api.models.CreateUserResponse;
 import api.models.comparison.ModelAssertions;
 import api.requests.steps.AdminSteps;
 import common.annotations.AdminSession;
-import org.junit.jupiter.api.Test;
-import ui.pages.AdminPanel;
 import constants.BankAlert;
+import org.junit.jupiter.api.Test;
+import ui.elements.UserBadge;
+import ui.pages.AdminPanel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,14 +21,14 @@ public class CreateUserTest extends BaseUiTest {
     public void adminCanCreateUserTest() {
         CreateUserRequest newUser = RandomModelGenerator.generate(CreateUserRequest.class);
 
-        assertTrue(
-                new AdminPanel().open()
-                        .createUser(newUser.getUsername(), newUser.getPassword())
-                        .checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY.getMessage())
-                        .getAllUsers().stream().anyMatch(
-                                userBadge -> userBadge.getUsername().equals(newUser.getUsername())
-                        )
-        );
+        UserBadge newUserBadge = new AdminPanel().open()
+                .createUser(newUser.getUsername(), newUser.getPassword())
+                .checkAlertMessageAndAccept(BankAlert.USER_CREATED_SUCCESSFULLY.getMessage())
+                .findUserByUsername(newUser.getUsername());
+
+        assertThat(newUserBadge)
+                .as("UserBadge should exist on Dashboard after user creation")
+                .isNotNull();
 
         CreateUserResponse createdUser = AdminSteps.getAllUsers().stream()
                 .filter(user -> user.getUsername().equals(newUser.getUsername()))

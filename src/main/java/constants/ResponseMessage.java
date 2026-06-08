@@ -18,7 +18,11 @@ public enum ResponseMessage {
     TRANSFER_SUCCESSFUL("Transfer successful"),
     INVALID_TRANSFER("Invalid transfer: insufficient funds or invalid accounts"),
 
-    PROFILE_UPDATED_SUCCESSFULLY("Profile updated successfully");
+    PROFILE_UPDATED_SUCCESSFULLY("Profile updated successfully"),
+    NAME_MUST_CONTAIN_TWO_WORDS("Name must contain two words with letters only"),
+
+    DEPOSIT_AMOUNT_MUST_BE_AT_LEAST("Deposit amount must be at least 0.01"),
+    DEPOSIT_AMOUNT_CANNOT_EXCEED("Deposit amount cannot exceed 5000");
 
     private final String message;
 }

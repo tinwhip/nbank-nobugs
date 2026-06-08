@@ -1,9 +1,12 @@
 package ui.elements;
 
 import com.codeborne.selenide.SelenideElement;
+import common.utils.RetryUtils;
 
 import java.util.List;
+import java.util.Objects;
 
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +23,21 @@ public class AccountSelector extends BaseElement {
     }
 
     public AccountSelector selectAccount(Long accountId) {
-        element.selectOptionByValue(accountId.toString());
+        String accountValue = accountId.toString();
+        RetryUtils.retry(
+                () -> {
+                    try {
+                        element.shouldBe(visible, enabled);
+                        element.selectOptionByValue(accountValue);
+                        return element.getSelectedOptionValue();
+                    } catch (Throwable e) {
+                        return null;
+                    }
+                },
+                selectedValue -> Objects.equals(accountValue, selectedValue),
+                10,
+                3000
+        );
         return this;
     }
 

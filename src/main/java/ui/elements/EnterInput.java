@@ -3,6 +3,7 @@ package ui.elements;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
+import common.utils.RetryUtils;
 import lombok.Getter;
 import org.awaitility.Awaitility;
 import org.openqa.selenium.Keys;
@@ -32,17 +33,17 @@ public class EnterInput extends BaseElement {
         element.shouldBe(visible, enabled, interactable);
         element.shouldNotBe(readonly);
 
-        Awaitility.await()
-                .pollInSameThread()
-                .atMost(Duration.ofSeconds(3))
-                .pollInterval(Duration.ofMillis(100))
-                .until(() -> {
-                    element.clear();
+        RetryUtils.retry(
+                () -> {
+                    clear();
                     element.sendKeys(value);
-                    Selenide.sleep(10);
-                    return value.equals(element.getValue());
-                });
-
+                    Selenide.sleep(100);
+                    return element.getValue();
+                },
+                expValue -> value.equals(expValue),
+                10,
+                1_000
+        );
         element.shouldHave(value(value));
 
         return this;
@@ -55,23 +56,19 @@ public class EnterInput extends BaseElement {
     }
 
     public EnterInput clearWhenInputResetting() {
-        element
-                .shouldBe(visible)
-                .shouldBe(enabled)
-                .shouldBe(interactable)
+        element.shouldBe(visible, enabled, interactable)
                 .shouldNotBe(readonly);
 
-        Awaitility.await()
-                .pollInSameThread()
-                .atMost(Duration.ofSeconds(3))
-                .pollInterval(Duration.ofMillis(100))
-                .until(() -> {
+        RetryUtils.retry(
+                () -> {
                     clear();
-
-                    Selenide.sleep(10);
-
-                    return Objects.equals("", element.getValue());
-                });
+                    Selenide.sleep(100);
+                    return element.getValue();
+                },
+                value -> Objects.equals("", value),
+                10,
+                1_000
+        );
 
         element.shouldBe(empty);
 

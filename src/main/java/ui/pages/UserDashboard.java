@@ -10,7 +10,7 @@ import static com.codeborne.selenide.Selenide.$;
 public class UserDashboard extends AuthorizedPage<UserDashboard> {
     public static final String WELCOME_TEXT = "Welcome, %s!";
     private SelenideElement welcomeText = $(Selectors.byClassName("welcome-text"));
-    private SelenideElement createNewAccount = $(Selectors.byText("➕ Create New AccountAnnotation"));
+    private SelenideElement createNewAccount = $(Selectors.byText("➕ Create New Account"));
 
     @Override
     public String url() {

@@ -7,6 +7,8 @@ import common.TestType;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import constants.BankAlert;
+import constants.DefaultProfileName;
+import constants.ResponseMessage;
 import iteration1.ui.BaseUiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,10 +45,10 @@ public class ChangeNameTest extends BaseUiTest {
     public void userCanNotSetInvalidName(String newName) {
         new ProfilePage().open()
                 .changeNameTo(newName)
-                .checkAlertMessageAndAccept(BankAlert.ENTER_A_VALID_NAME.getMessage())
+                .checkAlertMessageAndAccept(ResponseMessage.NAME_MUST_CONTAIN_TWO_WORDS.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
                 .getWelcomeText().shouldHave(Condition.text(
-                        UserDashboard.WELCOME_TEXT.formatted(newName)
+                        DefaultProfileName.DEFAULT_PROFILE_NAME.getDefaultNameValue()
                 ));
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
@@ -58,7 +60,7 @@ public class ChangeNameTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     @DisplayName("Изменение введённого имени пользователя на валидное значение")
     public void userCanUpdateValidName(String newName) {
-        SessionStorage.getSteps().changeProfileName(RandomData.getCyrillicProfileName());
+        SessionStorage.getSteps().changeProfileName(RandomData.getLatinProfileName());
 
         new ProfilePage().open()
                 .changeNameTo(newName)
@@ -76,7 +78,7 @@ public class ChangeNameTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     @DisplayName("Изменение имени на то же самое")
     public void changeTheSameName() {
-        String name = RandomData.getCyrillicProfileName();
+        String name = RandomData.getLatinProfileName();
         SessionStorage.getSteps().changeProfileName(name);
 
         new ProfilePage().open()
@@ -95,7 +97,7 @@ public class ChangeNameTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     @DisplayName("Изменение имени на пустое")
     public void changeToEmptyName() {
-        String name = RandomData.getCyrillicProfileName();
+        String name = RandomData.getLatinProfileName();
         SessionStorage.getSteps().changeProfileName(name);
         new UserDashboard().open();
         new ProfilePage().open()

@@ -14,12 +14,15 @@ import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import api.Endpoint;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static api.generators.RandomData.getRandomAccountId;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,18 +58,26 @@ public class AccountDepositTest extends BaseTest {
         assertThat(accountInfo.getBalance()).isEqualTo(amount);
     }
 
-    @ValueSource(doubles = {0, -1, MAX_DEPOSIT_AMOUNT + 1})
+    public static Stream<Arguments> userCanNotDepositExistAccountWithBadValueSource() {
+        return Stream.of(
+                Arguments.of(0, ResponseMessage.DEPOSIT_AMOUNT_MUST_BE_AT_LEAST.getMessage()),
+                Arguments.of(-1, ResponseMessage.DEPOSIT_AMOUNT_MUST_BE_AT_LEAST.getMessage()),
+                Arguments.of(MAX_DEPOSIT_AMOUNT + 1, ResponseMessage.DEPOSIT_AMOUNT_CANNOT_EXCEED.getMessage())
+        );
+    }
+
+    @MethodSource("userCanNotDepositExistAccountWithBadValueSource")
     @ParameterizedTest
     @DisplayName("Депозит невалидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.API)
-    public void userCanNotDepositExistAccountWithBadValue(double amount) {
+    public void userCanNotDepositExistAccountWithBadValue(double amount, String errorMessage) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
 
         //закинуть деньги на счёт
         new CrudRequester(
                 RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
-                ResponseSpecs.requestReturnsBadRequest(ResponseMessage.INVALID_ACCOUNT_OR_AMOUNT.getMessage())
+                ResponseSpecs.requestReturnsBadRequest(errorMessage)
         ).post(
                 new DepositRequest(account.getId(), amount)
         );

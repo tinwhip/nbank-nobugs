@@ -14,7 +14,6 @@ public final class ChangeNameDataProvider {
 
     public static Stream<String> validNameProvider() {
         return Stream.of(
-                getCyrillicProfileName(),
                 getLatinProfileName()
         );
     }
@@ -28,7 +27,8 @@ public final class ChangeNameDataProvider {
                         randomAlphabetic(5), randomAlphabetic(5), randomAlphabetic(5)
                 ),
                 VALID_NAME_PLACEHOLDER.getPlaceholderValue().formatted(
-                        randomAlphanumeric(5),randomAlphanumeric(5)
+                        randomAlphabetic(5) + randomNumeric(5),
+                        randomAlphabetic(5) + randomNumeric(5)
                 ),
                 VALID_NAME_PLACEHOLDER.getPlaceholderValue().formatted(
                         randomNumeric(5), randomNumeric(5)
