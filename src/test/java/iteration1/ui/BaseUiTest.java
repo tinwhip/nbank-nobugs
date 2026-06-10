@@ -9,6 +9,7 @@ import common.extensions.AdminSessionExtension;
 import common.extensions.BrowserMatchExtension;
 import common.extensions.UserSessionExtension;
 import iteration1.api.BaseTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -22,10 +23,16 @@ public class BaseUiTest extends BaseTest {
         Configuration.baseUrl = Config.getProperty("uiBaseUrl");
         Configuration.browserSize = Config.getProperty("uiBrowserSize");
         Configuration.browser = Config.getProperty("uiBrowser");
+        Configuration.headless = true;
 
         Configuration.browserCapabilities.setCapability(
                 "selenoid:options",
                 Map.of("enableVNC", true, "enableLog", true)
         );
+    }
+
+    @AfterEach
+    public void teardown() {
+        Selenide.closeWebDriver();
     }
 }

@@ -9,7 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class SessionStorage {
-    private static final SessionStorage INSTANCE = new SessionStorage();
+    /**
+     * Thread Local - способ сделать SessionStorage потокобезопасным
+     * Каждый поток обращаясь к INSTANCE.get() получают свою КОПИЮ
+     * Map<Thread, SessionStorage>
+     * Тест1: создал юзеров, положил в SessionStorage (своя копия1), работает с ними
+     * Тест2: создал юзеров, положил в SessionStorage (своя копия2), работает с ними
+     */
+    private static final ThreadLocal<SessionStorage> INSTANCE = ThreadLocal.withInitial(SessionStorage::new);
 
     private final LinkedHashMap<CreateUserRequest, UserSteps> userStepsMap = new LinkedHashMap<>();
     private final LinkedHashMap<String, CreateAccountResponse> accountsMap = new LinkedHashMap<>();
@@ -18,12 +25,12 @@ public class SessionStorage {
 
     public static void addUsers(List<CreateUserRequest> users) {
         for (CreateUserRequest user : users) {
-            INSTANCE.userStepsMap.put(user, new UserSteps(user.getUsername(), user.getPassword()));
+            INSTANCE.get().userStepsMap.put(user, new UserSteps(user.getUsername(), user.getPassword()));
         }
     }
 
     public static void addAccount(String accountName, CreateAccountResponse account) {
-            INSTANCE.accountsMap.put(accountName, account);
+            INSTANCE.get().accountsMap.put(accountName, account);
     }
 
     /**
@@ -32,7 +39,7 @@ public class SessionStorage {
      * @return Объект CreateUserRequest, соответствующий указанному порядковому номеру
      */
     public static CreateUserRequest getUser(int number) {
-        return new ArrayList<>(INSTANCE.userStepsMap.keySet()).get(number - 1);
+        return new ArrayList<>(INSTANCE.get().userStepsMap.keySet()).get(number - 1);
     }
 
     public static CreateUserRequest getUser() {
@@ -40,7 +47,7 @@ public class SessionStorage {
     }
 
     public static UserSteps getSteps(int number) {
-        return new ArrayList<>(INSTANCE.userStepsMap.values()).get(number - 1);
+        return new ArrayList<>(INSTANCE.get().userStepsMap.values()).get(number - 1);
     }
 
     public static UserSteps getSteps() {
@@ -48,10 +55,10 @@ public class SessionStorage {
     }
 
     public static CreateAccountResponse getAccount(String accountName) {
-        return INSTANCE.accountsMap.get(accountName);
+        return INSTANCE.get().accountsMap.get(accountName);
     }
 
     public static void clear() {
-        INSTANCE.userStepsMap.clear();
+        INSTANCE.get().userStepsMap.clear();
     }
 }
