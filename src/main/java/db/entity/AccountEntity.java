@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AccountEntity {
+public class AccountEntity extends BaseEntity {
     private Long id;
     private String accountNumber;
     private Double balance;

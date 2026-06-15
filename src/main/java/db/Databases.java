@@ -4,13 +4,10 @@ import api.configs.Config;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class Databases {
 
-    private Databases() {
-    }
+    private Databases() {}
 
     public static DataSource dataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
@@ -20,7 +17,4 @@ public class Databases {
         return ds;
     }
 
-    public static Connection connection() throws SQLException {
-        return dataSource().getConnection();
-    }
 }

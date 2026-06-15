@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransactionEntity {
+public class TransactionEntity extends BaseEntity {
     private Long id;
     private Double amount;
     private String type;

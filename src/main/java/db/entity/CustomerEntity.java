@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CustomerEntity {
+public class CustomerEntity extends BaseEntity {
     private Long id;
     private String username;
     private String password;
