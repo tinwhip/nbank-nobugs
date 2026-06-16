@@ -6,7 +6,6 @@ import common.TestType;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import db.entity.AccountEntity;
-import db.entity.CustomerEntity;
 import db.entity.comparison.DaoAndModelAssertions;
 import db.request.DbRequest;
 import db.request.DbTable;
@@ -19,6 +18,7 @@ import api.specs.ResponseSpecs;
 import java.util.List;
 
 import static db.request.Condition.equalTo;
+import static db.steps.AccountsTableSteps.getAccountById;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateAccountTest extends BaseTest {
@@ -39,13 +39,6 @@ public class CreateAccountTest extends BaseTest {
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class);
         assertThat(accountResponse).isEqualTo(accounts.get(0));
-
-        AccountEntity accountEntity = DbRequest.builder()
-                .requestType(RequestType.SELECT)
-                .table(DbTable.ACCOUNTS)
-                .where(equalTo("id", accountResponse.getId()))
-                .perform();
-
-        DaoAndModelAssertions.assertThat(accountResponse, accountEntity).match();
+        DaoAndModelAssertions.assertThat(accountResponse, getAccountById(accountResponse.getId())).match();
     }
 }

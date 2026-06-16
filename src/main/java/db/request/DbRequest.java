@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static db.Databases.dataSource;
 
@@ -20,6 +21,7 @@ public class DbRequest {
     private RequestType requestType;
     private List<Condition> conditions;
     private DbTable table;
+    private List<FieldUpdate> fieldUpdate;
 
     @SuppressWarnings("unchecked")
     private <T extends BaseEntity> List<T> performList() {
@@ -27,8 +29,16 @@ public class DbRequest {
                 .map(Condition::getValue)
                 .toArray();
 
-        return (List<T>) new JdbcTemplate(dataSource()).query(buildSql(), table.getRowMapper(), args
-        );
+        return (List<T>) new JdbcTemplate(dataSource()).query(buildSql(), table.getRowMapper(), args);
+    }
+
+    private void performUpdate() {
+        Object[] args = Stream.concat(
+                fieldUpdate.stream().map(FieldUpdate::getValue),
+                conditions.stream().map(Condition::getValue)
+        ).toArray();
+
+        new JdbcTemplate(dataSource()).update(buildSql(), args);
     }
 
     private String buildSql() {
@@ -39,6 +49,15 @@ public class DbRequest {
             case UPDATE -> sql.append("UPDATE %s\n".formatted(table.name()));
             case DELETE -> sql.append("DELETE FROM %s\n".formatted(table.name()));
             case INSERT -> sql.append("INSERT INTO %s\n".formatted(table.name()));
+        }
+
+        if (fieldUpdate != null && !fieldUpdate.isEmpty()) {
+            sql.append("SET ");
+            for (int i = 0; i < fieldUpdate.size(); i++) {
+                if (i > 0) sql.append(", ");
+                FieldUpdate field = fieldUpdate.get(i);
+                sql.append(field.getColumn()).append(" = ? ");
+            }
         }
 
         if (!conditions.isEmpty()) {
@@ -62,6 +81,7 @@ public class DbRequest {
         private RequestType requestType;
         private List<Condition> conditions = new ArrayList<>();
         private DbTable table;
+        private List<FieldUpdate> fieldsUpdate = new ArrayList<>();
 
         public DbRequestBuilder request(RequestType requestType) {
             this.requestType = requestType;
@@ -80,6 +100,11 @@ public class DbRequest {
 
         public DbRequestBuilder where(Condition... conditions) {
             this.conditions.addAll(Arrays.asList(conditions));
+            return this;
+        }
+
+        public DbRequestBuilder set(FieldUpdate... fieldsUpdate) {
+            this.fieldsUpdate.addAll(Arrays.asList(fieldsUpdate));
             return this;
         }
 
@@ -103,6 +128,19 @@ public class DbRequest {
             }
 
             return result.get(0);
+        }
+
+        public void performUpdate() {
+            if (requestType != RequestType.UPDATE) {
+                throw new IllegalArgumentException("Method allowed only for UPDATE RequestType");
+            }
+            DbRequest.builder()
+                    .requestType(requestType)
+                    .table(table)
+                    .fieldUpdate(fieldsUpdate)
+                    .conditions(conditions)
+                    .build()
+                    .performUpdate();
         }
     }
 }

@@ -3,8 +3,10 @@ package iteration2.api;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import common.TestType;
+import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
+import db.entity.comparison.DaoAndModelAssertions;
 import iteration1.api.BaseTest;
 import api.models.CreateUserRequest;
 import api.models.CustomerProfileRequest;
@@ -22,6 +24,8 @@ import api.specs.ResponseSpecs;
 import java.util.stream.Stream;
 
 import static api.generators.RandomData.getCyrillicString;
+import static db.steps.CustomerTableSteps.getUserByUsername;
+import static db.steps.TransactionsTableSteps.getSenderTransaction;
 import static org.apache.commons.lang3.RandomStringUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +35,7 @@ public class ChangeNameTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Изменение имени пользователя на валидное значение")
     @UserSession(testType = TestType.API)
+    @ApiVersion(version = "with_database_with_fix")
     public void userCanUpdateValidName(String name) {
         UpdateCustomerProfileResponse updateCustomerProfileResponse =
                 new ValidatedCrudRequester<UpdateCustomerProfileResponse>(
@@ -46,12 +51,16 @@ public class ChangeNameTest extends BaseTest {
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(name);
+        DaoAndModelAssertions.assertThat(
+                getCustomerProfileResponse, getUserByUsername(SessionStorage.getUser().getUsername())
+        ).match();
     }
 
     @MethodSource("testdataproviders.ChangeNameDataProvider#invalidNameProvider")
     @ParameterizedTest
     @DisplayName("Невозможность изменения имени пользователя на невалидное значение")
     @UserSession(testType = TestType.API)
+    @ApiVersion(version = "with_database_with_fix")
     public void userCanNotUpdateInvalidName(String name) {
         new CrudRequester(
                 RequestSpecs.authAsUser(SessionStorage.getUser()),
@@ -61,6 +70,9 @@ public class ChangeNameTest extends BaseTest {
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isNotEqualTo(name);
+        DaoAndModelAssertions.assertThat(
+                getCustomerProfileResponse, getUserByUsername(SessionStorage.getUser().getUsername())
+        ).match();
     }
 
 }

@@ -2,6 +2,7 @@ package iteration2.ui;
 
 import api.models.CreateAccountResponse;
 import common.TestType;
+import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import constants.BankAlert;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 
 import static api.generators.RandomData.getRandomDouble;
 import static api.requests.steps.UserSteps.MAX_DEPOSIT_AMOUNT;
+import static db.steps.AccountsTableSteps.getAccountById;
 import static org.assertj.core.api.Assertions.assertThat;
 import static constants.BankAlert.*;
 
@@ -29,6 +31,7 @@ public class AccountDepositTest extends BaseUiTest {
     @ParameterizedTest
     @DisplayName("Депозит валидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanDepositToExistAccount(double amount) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
          new DepositMoney().open()
@@ -38,7 +41,7 @@ public class AccountDepositTest extends BaseUiTest {
                 )
                 .open()
                 .getAccountSelector()
-                .checkAccountHasBalance(account.getId(), amount);
+                .checkAccountHasBalance(account.getAccountNumber(), amount);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
         assertThat(balance).isEqualTo(amount);
@@ -55,6 +58,7 @@ public class AccountDepositTest extends BaseUiTest {
     @ParameterizedTest
     @DisplayName("Депозит невалидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_database_with_fix")
     public void userCanNotDepositExistAccountWithBadValue(double amount, String alert) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
         new DepositMoney().open()
@@ -62,15 +66,17 @@ public class AccountDepositTest extends BaseUiTest {
                 .checkAlertMessageAndAccept(alert)
                 .open()
                 .getAccountSelector()
-                .checkAccountHasBalance(account.getId(), 0);
+                .checkAccountHasBalance(account.getAccountNumber(), 0);
 
         double balance = SessionStorage.getSteps().getAccountById(account.getId()).getBalance();
         assertThat(balance).isEqualTo(0);
+        assertThat(getAccountById(account.getId()).getBalance()).isZero();
     }
 
     @Test
     @DisplayName("Депозит без выбора аккаунта")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_database_with_fix")
     public void userCanNotDepositWithoutAccount() {
         double amount = getRandomDouble(0, MAX_DEPOSIT_AMOUNT);
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
@@ -81,10 +87,11 @@ public class AccountDepositTest extends BaseUiTest {
 
         depositMoney.checkAlertMessageAndAccept(PLEASE_SELECT_ACCOUNT.getMessage())
                 .open().getAccountSelector()
-                .checkAccountHasBalance(account.getId(), 0);
+                .checkAccountHasBalance(account.getAccountNumber(), 0);
 
         SessionStorage.getSteps().getAllAccounts().forEach(
                 createdAccount -> assertThat(createdAccount.getBalance()).isEqualTo(0)
         );
+        assertThat(getAccountById(account.getId()).getBalance()).isZero();
     }
 }

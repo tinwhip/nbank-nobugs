@@ -46,12 +46,12 @@ public class AccountSelector extends BaseElement {
         return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
     }
 
-    public AccountSelector checkAccountHasBalance(Long accountId, double amount) {
+    public AccountSelector checkAccountHasBalance(String accountNumber, double amount) {
         assertThat(
                 getAllAccounts().stream()
-                        .filter(account -> account.getId() == accountId)
+                        .filter(account -> account.getAccountNumber().equals(accountNumber))
                         .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Account id %d not found".formatted(accountId)))
+                        .orElseThrow(() -> new RuntimeException("Account number %s not found".formatted(accountNumber)))
                         .getBalance()
         ).isEqualTo(amount);
         return this;
