@@ -1,12 +1,11 @@
 package api.requests.steps;
 
-import api.models.*;
 import api.Endpoint;
+import api.models.*;
 import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
-import common.storage.SessionStorage;
 
 import java.util.List;
 
@@ -106,9 +105,24 @@ public class UserSteps {
 
     public UpdateCustomerProfileResponse changeProfileName(String name) {
         return new ValidatedCrudRequester<UpdateCustomerProfileResponse>(
-                        RequestSpecs.authAsUser(username, password),
-                        Endpoint.UPDATE_CUSTOMER_PROFILE,
-                        ResponseSpecs.requestReturnsOK()
-                ).update(new CustomerProfileRequest(name));
+                RequestSpecs.authAsUser(username, password),
+                Endpoint.UPDATE_CUSTOMER_PROFILE,
+                ResponseSpecs.requestReturnsOK()
+        ).update(new CustomerProfileRequest(name));
     }
+
+    public TransferResponse transferWithFraudCheck(Long senderAccountId, Long receiverAccountId, double amount) {
+        TransferRequest transferRequest = TransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(receiverAccountId)
+                .amount(amount)
+                .description("Test transfer with fraud check")
+                .build();
+
+        return new ValidatedCrudRequester<TransferResponse>(
+                RequestSpecs.authAsUser(username, password),
+                Endpoint.TRANSFER_WITH_FRAUD_CHECK,
+                ResponseSpecs.requestReturnsOK()).post(transferRequest);
+    }
+
 }

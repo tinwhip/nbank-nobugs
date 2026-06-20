@@ -60,5 +60,10 @@ public class SessionStorage {
 
     public static void clear() {
         INSTANCE.get().userStepsMap.clear();
+        INSTANCE.get().accountsMap.clear();
+    }
+
+    public static void remove() {
+        INSTANCE.remove();
     }
 }
