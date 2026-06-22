@@ -7,10 +7,12 @@ import api.models.comparison.ModelAssertions;
 import api.requests.steps.AdminSteps;
 import common.annotations.AdminSession;
 import constants.BankAlert;
+import db.entity.comparison.DaoAndModelAssertions;
 import org.junit.jupiter.api.Test;
 import ui.elements.UserBadge;
 import ui.pages.AdminPanel;
 
+import static db.steps.CustomerTableSteps.getUserByUsername;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,6 +36,7 @@ public class CreateUserTest extends BaseUiTest {
                 .filter(user -> user.getUsername().equals(newUser.getUsername()))
                 .findFirst().get();
         ModelAssertions.assertThatModels(newUser, createdUser).match();
+        DaoAndModelAssertions.assertThat(createdUser, getUserByUsername(newUser.getUsername())).match();
     }
 
     @Test
@@ -53,5 +56,6 @@ public class CreateUserTest extends BaseUiTest {
                 .filter(user -> user.getUsername().equals(newUser.getUsername()))
                 .count();
         assertThat(usersWithSameUsernameAsNewUser).isZero();
+        assertThat(getUserByUsername(newUser.getUsername())).isNull();
     }
 }

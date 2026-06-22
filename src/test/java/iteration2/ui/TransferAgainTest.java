@@ -2,6 +2,7 @@ package iteration2.ui;
 
 import api.models.CreateAccountResponse;
 import common.TestType;
+import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import iteration1.ui.BaseUiTest;
@@ -19,6 +20,7 @@ public class TransferAgainTest extends BaseUiTest {
     @Test
     @DisplayName("Отображение истории транзакций между своими счетами")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanSearchTransactionBetweenOwnTransfers() {
         double transferAmount = getRandomDouble(1, MAX_DEPOSIT_AMOUNT);
         CreateAccountResponse firstAccount = getSteps().createAccount();
@@ -38,6 +40,7 @@ public class TransferAgainTest extends BaseUiTest {
     @Test
     @DisplayName("Отображение истории перевода на чужой счёт")
     @UserSession(testType = TestType.UI, value = 2, auth = 1)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanSearchTransactionBetweenOtherTransfer() {
         double transferAmount = getRandomDouble(1, MAX_DEPOSIT_AMOUNT);
         CreateAccountResponse firstAccount = getSteps(1).createAccount();

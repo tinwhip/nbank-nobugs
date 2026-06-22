@@ -3,6 +3,7 @@ package iteration2.api;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import common.TestType;
+import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import iteration1.api.BaseTest;
@@ -34,6 +35,7 @@ public class AccountDepositTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Депозит валидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.API)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanDepositExistAccount(double amount) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
 
@@ -42,9 +44,8 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsOK()
-        ).post(
-                new DepositRequest(account.getId(), amount)
-        );
+        ).post(new DepositRequest(account.getId(), amount));
+
         assertThat(account.getId()).isEqualTo(depositAccountResponse.getId());
         assertThat(depositAccountResponse.getBalance()).isEqualTo(amount);
         assertThat(depositAccountResponse.getTransactions().get(0).getRelatedAccountId()).isEqualTo(account.getId());
@@ -70,6 +71,7 @@ public class AccountDepositTest extends BaseTest {
     @ParameterizedTest
     @DisplayName("Депозит невалидной суммы на свой существующий счёт")
     @UserSession(testType = TestType.API)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotDepositExistAccountWithBadValue(double amount, String errorMessage) {
         CreateAccountResponse account = SessionStorage.getSteps().createAccount();
 
@@ -78,9 +80,7 @@ public class AccountDepositTest extends BaseTest {
                 RequestSpecs.authAsUser(SessionStorage.getUser(1)),
                 Endpoint.ACCOUNTS_DEPOSIT,
                 ResponseSpecs.requestReturnsBadRequest(errorMessage)
-        ).post(
-                new DepositRequest(account.getId(), amount)
-        );
+        ).post(new DepositRequest(account.getId(), amount));
 
         //проверить, что у аккаунта не отображается транзакция
         List<TransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsByAccountId(account.getId());
@@ -90,6 +90,7 @@ public class AccountDepositTest extends BaseTest {
     @Test
     @DisplayName("Депозит на несуществующий счёт")
     @UserSession(testType = TestType.API)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotDepositUnexistAccount() {
         int notExistsAccountId = getRandomAccountId();
         double amount = RandomUtils.nextDouble(1, MAX_DEPOSIT_AMOUNT);
@@ -106,6 +107,7 @@ public class AccountDepositTest extends BaseTest {
     @Test
     @DisplayName("Депозит на чужой счёт")
     @UserSession(testType = TestType.API, value = 2)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotDepositOtherAccount() {
         double amount = RandomUtils.nextDouble(1, MAX_DEPOSIT_AMOUNT);
         CreateAccountResponse account = SessionStorage.getSteps(2).createAccount();

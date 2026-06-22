@@ -3,6 +3,7 @@ package iteration2.ui;
 import api.models.CreateAccountResponse;
 import api.models.TransactionsResponse;
 import common.TestType;
+import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import constants.BankAlert;
@@ -36,6 +37,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @Test
     @DisplayName("Повторный перевод на свой счёт")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanRepeatTransferToOwnAccount() {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
@@ -90,6 +92,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @Test
     @DisplayName("Повторный перевод на чужой счёт")
     @UserSession(testType = TestType.UI, value = 2)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanSearchTransactionBetweenOtherTransfer() {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
@@ -144,6 +147,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @Test
     @DisplayName("Не активность кнопки Send Transfer без выбранного аккаунта")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotRepeatTransferWithoutSelectAccount() {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
@@ -169,6 +173,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @Test
     @DisplayName("Не активность кнопки Send Transfer без подтверждения деталей")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotRepeatTransferWithoutConfirm() {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
@@ -195,6 +200,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @ParameterizedTest
     @DisplayName("Отсутствие перевода с некорректным Amount")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanNotRepeatTransferWithInvalidAmount(double secondTransferAmount) {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
@@ -238,6 +244,7 @@ public class RepeatTransferTest extends BaseUiTest {
     @Test
     @DisplayName("Отмена повторного перевода")
     @UserSession(testType = TestType.UI)
+    @ApiVersion(version = "with_validation_fix")
     public void userCanCancelRepeatTransfer() {
         double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);

@@ -7,6 +7,14 @@ import api.models.CreateUserResponse;
 import api.models.UserRole;
 import api.requests.skeleton.requesters.CrudRequester;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import db.entity.AccountEntity;
+import db.entity.BaseEntity;
+import db.entity.CustomerEntity;
+import db.entity.comparison.DaoAndModelAssertions;
+import db.request.Condition;
+import db.request.DbRequest;
+import db.request.DbTable;
+import db.request.RequestType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -20,8 +28,11 @@ import java.util.stream.Stream;
 
 import static api.models.comparison.ModelAssertions.assertThatModels;
 import static constants.ResponseMessage.*;
+import static db.request.Condition.equalTo;
+import static db.steps.CustomerTableSteps.getUserByUsername;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class CreateUserTest extends BaseTest {
@@ -35,7 +46,9 @@ public class CreateUserTest extends BaseTest {
                 Endpoint.ADMIN_USER,
                 ResponseSpecs.entityWasCreated()
         ).post(createUserRequest);
+
         assertThatModels(createUserRequest, createUserResponse).match();
+        DaoAndModelAssertions.assertThat(createUserResponse, getUserByUsername(createUserRequest.getUsername())).match();
     }
 
     private static Stream<Arguments> userInvalidData() {
@@ -63,5 +76,7 @@ public class CreateUserTest extends BaseTest {
                 Endpoint.ADMIN_USER,
                 ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue)
         ).post(createUserRequest);
+
+        assertThat(getUserByUsername(createUserRequest.getUsername())).isNull();
     }
 }

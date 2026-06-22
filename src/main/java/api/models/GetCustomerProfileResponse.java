@@ -15,7 +15,7 @@ public class GetCustomerProfileResponse extends BaseModel {
     private String password;
     private String role;
     private String name;
-    private Integer id;
+    private Long id;
     private List<CreateAccountResponse> accounts;
     private String username;
 }

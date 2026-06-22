@@ -5,6 +5,11 @@ import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import common.TestType;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
+import db.entity.AccountEntity;
+import db.entity.comparison.DaoAndModelAssertions;
+import db.request.DbRequest;
+import db.request.DbTable;
+import db.request.RequestType;
 import org.junit.jupiter.api.Test;
 import api.Endpoint;
 import api.specs.RequestSpecs;
@@ -12,6 +17,8 @@ import api.specs.ResponseSpecs;
 
 import java.util.List;
 
+import static db.request.Condition.equalTo;
+import static db.steps.AccountsTableSteps.getAccountById;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateAccountTest extends BaseTest {
@@ -32,5 +39,6 @@ public class CreateAccountTest extends BaseTest {
                 ResponseSpecs.requestReturnsOK()
         ).getAll(CreateAccountResponse[].class);
         assertThat(accountResponse).isEqualTo(accounts.get(0));
+        DaoAndModelAssertions.assertThat(accountResponse, getAccountById(accountResponse.getId())).match();
     }
 }
