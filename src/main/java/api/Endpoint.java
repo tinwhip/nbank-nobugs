@@ -1,5 +1,6 @@
 package api;
 
+import api.models.mockmodel.FraudCheckResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import api.models.*;
@@ -15,7 +16,10 @@ public enum Endpoint {
     ACCOUNTS_TRANSFER("/accounts/transfer", TransferRequest.class, TransferResponse.class),
     ACCOUNT_TRANSACTIONS("/accounts/{id}/transactions", BaseModel.class, TransactionsResponse.class),
     UPDATE_CUSTOMER_PROFILE("/customer/profile", CustomerProfileRequest.class, UpdateCustomerProfileResponse.class),
-    GET_CUSTOMER_PROFILE("/customer/profile", CustomerProfileRequest.class, GetCustomerProfileResponse.class);
+    GET_CUSTOMER_PROFILE("/customer/profile", CustomerProfileRequest.class, GetCustomerProfileResponse.class),
+
+    TRANSFER_WITH_FRAUD_CHECK("/accounts/transfer-with-fraud-check", TransferRequest.class, TransferResponse.class),
+    FRAUD_CHECK_STATUS("/api/v1/accounts/fraud-check/{transactionId}", BaseModel.class, FraudCheckResponse.class);
 
     private final String url;
     private final Class<? extends BaseModel> requestModel;

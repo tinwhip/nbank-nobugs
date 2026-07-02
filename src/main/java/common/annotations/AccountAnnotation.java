@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target({})
 public @interface AccountAnnotation {
     int user() default 1;
-    String accountName();
+    //double
 }
