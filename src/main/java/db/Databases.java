@@ -1,6 +1,6 @@
 package db;
 
-import api.configs.Config;
+import common.configs.Config;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
