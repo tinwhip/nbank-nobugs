@@ -88,7 +88,7 @@ services:
     ports:
       - "6567:8080"
     command: [ "--selenoid-uri", "http://selenoid:4444" ]
-    depends_on: selenoid
+#    depends_on: selenoid
 #      selenoid:
 #        condition: service_healthy
     networks:
