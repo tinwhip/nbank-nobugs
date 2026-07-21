@@ -1,6 +1,6 @@
 package api.specs;
 
-import api.configs.Config;
+import common.configs.Config;
 import api.models.CreateUserRequest;
 import api.requests.skeleton.requesters.CrudRequester;
 import io.restassured.builder.RequestSpecBuilder;

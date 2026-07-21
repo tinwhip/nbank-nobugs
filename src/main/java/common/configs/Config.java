@@ -1,4 +1,4 @@
-package api.configs;
+package common.configs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +20,21 @@ public class Config {
     }
 
     public static String getProperty(String key) {
+        //Приоритет 1 - системное свойство
+        String systemValue = System.getProperty(key);
+        if (systemValue != null) {
+            return systemValue;
+        }
+
+        //Приоритет 2 - переменная окружения
+        //admin.username -> ADMIN_USERNAME
+        String envKey = key.toUpperCase().replace(".", "_");
+        String envValue = System.getenv(envKey);
+        if (envValue != null) {
+            return envValue;
+        }
+
+        //Приоритет 3 - config.properties
         return INSTANCE.properties.getProperty(key);
     }
 }

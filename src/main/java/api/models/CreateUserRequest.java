@@ -1,6 +1,6 @@
 package api.models;
 
-import api.configs.Config;
+import common.configs.Config;
 import api.generators.GeneratingRule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
