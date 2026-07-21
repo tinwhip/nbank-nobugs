@@ -40,4 +40,4 @@ jobs: # аналог этапов
           ./mvnw clean test -q
         env:
           APIBASEURL: http://localhost:4111
-          UIBASEURL: http://localhost:3000
+          UIBASEURL: http://frontend:80
