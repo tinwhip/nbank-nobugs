@@ -29,29 +29,6 @@ jobs: # аналог этапов
       - name: Set up services
         run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
 
-      - name: Show Docker diagnostics
-        if: always()
-        working-directory: infra/docker_compose
-        run: |
-            echo "=== Docker Compose status ==="
-            docker compose ps -a
-            
-            echo "=== Selenoid logs ==="
-            docker compose logs --no-color --tail=500 selenoid || true
-          
-            echo "=== Selenoid healthcheck ==="
-            SELENOID_ID=$(docker compose ps -q selenoid)
-            
-            if [ -n "$SELENOID_ID" ]; then
-              docker inspect "$SELENOID_ID" \
-                --format='Status={{.State.Status}} Health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
-            
-              docker inspect "$SELENOID_ID" \
-                --format='{{range .State.Health.Log}}{{println "ExitCode:" .ExitCode}}{{println .Output}}{{end}}'
-            else
-              echo "Selnoid container was not created"
-            fi
-
       - name: Run tests
         run: ./mvnw clean test -q
         env:
