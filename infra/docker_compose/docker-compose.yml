@@ -65,18 +65,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/:/etc/selenoid/:ro
     command: [ "-container-network", "nbank-network" ]
-    healthcheck:
-      test: [
-        "CMD",
-        "wget",
-        "-q",
-        "--spider",
-        "http://localhost:4444/ping"
-      ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+#    healthcheck:
+#      test: [
+#        "CMD",
+#        "wget",
+#        "-q",
+#        "--spider",
+#        "http://localhost:4444/ping"
+#      ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 40s
     depends_on:
       frontend:
         condition: service_healthy
@@ -88,9 +88,9 @@ services:
     ports:
       - "6567:8080"
     command: [ "--selenoid-uri", "http://selenoid:4444" ]
-    depends_on:
-      selenoid:
-        condition: service_healthy
+    depends_on: selenoid
+#      selenoid:
+#        condition: service_healthy
     networks:
       - nbank-network
 
