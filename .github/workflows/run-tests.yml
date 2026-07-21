@@ -26,18 +26,46 @@ jobs: # аналог этапов
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Show Compose configuration
+      - name: Show Docker configuration
+        working-directory: infra/docker_compose
         run: |
-          pwd
-          ls -la
-          docker compose version
-          docker compose config
+            pwd
+            ls -la
+            docker version
+            docker compose version
+            docker compose config
 
       - name: Set up services
         run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
+
+      - name: Show Docker diagnostics
+        if: always()
+        working-directory: infra/docker_compose
+        run: |
+            echo "=== Docker Compose status ==="
+            docker compose ps -a
+            
+            echo "=== Backend logs ==="
+            docker compose logs --no-color --tail=500 backend || true
+            
+            echo "=== PostgreSQL logs ==="
+            docker compose logs --no-color --tail=200 postgres || true
+            
+            echo "=== Backend healthcheck ==="
+            BACKEND_ID=$(docker compose ps -q backend)
+            
+            if [ -n "$BACKEND_ID" ]; then
+              docker inspect "$BACKEND_ID" \
+                --format='Status={{.State.Status}} Health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
+            
+              docker inspect "$BACKEND_ID" \
+                --format='{{range .State.Health.Log}}{{println "ExitCode:" .ExitCode}}{{println .Output}}{{end}}'
+            else
+              echo "Backend container was not created"
+            fi
 
       - name: Run tests
         run: ./mvnw clean test -q
         env:
           APIBASEURL: http://localhost:4111
-          UIBASEURL: http://frontend:80
+          UIBASEURL: http://localhost:3000
