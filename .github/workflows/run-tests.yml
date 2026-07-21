@@ -26,6 +26,13 @@ jobs: # аналог этапов
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Show Compose configuration
+        run: |
+          pwd
+          ls -la
+          docker compose version
+          docker compose config
+
       - name: Set up services
         run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
 

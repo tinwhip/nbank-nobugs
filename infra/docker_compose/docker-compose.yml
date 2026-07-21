@@ -41,7 +41,7 @@ services:
 
   frontend:
     image: nobugsme/nbank-ui:preprod_version
-    expose: # мы не открываем порт наружу, а даём доступ контейнерам в сети (для безопасности)
+    ports: # мы не открываем порт наружу, а даём доступ контейнерам в сети (для безопасности)
       - "3000:80"
     depends_on:
       backend:
