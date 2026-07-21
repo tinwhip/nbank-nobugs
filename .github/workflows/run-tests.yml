@@ -26,15 +26,6 @@ jobs: # аналог этапов
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Show Docker configuration
-        working-directory: infra/docker_compose
-        run: |
-            pwd
-            ls -la
-            docker version
-            docker compose version
-            docker compose config
-
       - name: Set up services
         run: cd infra/docker_compose && bash restart_docker.sh && cd ../..
 
@@ -45,23 +36,20 @@ jobs: # аналог этапов
             echo "=== Docker Compose status ==="
             docker compose ps -a
             
-            echo "=== Backend logs ==="
-            docker compose logs --no-color --tail=500 backend || true
+            echo "=== Selenoid logs ==="
+            docker compose logs --no-color --tail=500 selenoid || true
+          
+            echo "=== Selenoid healthcheck ==="
+            SELENOID_ID=$(docker compose ps -q selenoid)
             
-            echo "=== PostgreSQL logs ==="
-            docker compose logs --no-color --tail=200 postgres || true
-            
-            echo "=== Backend healthcheck ==="
-            BACKEND_ID=$(docker compose ps -q backend)
-            
-            if [ -n "$BACKEND_ID" ]; then
-              docker inspect "$BACKEND_ID" \
+            if [ -n "$SELENOID_ID" ]; then
+              docker inspect "$SELENOID_ID" \
                 --format='Status={{.State.Status}} Health={{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}'
             
-              docker inspect "$BACKEND_ID" \
+              docker inspect "$SELENOID_ID" \
                 --format='{{range .State.Health.Log}}{{println "ExitCode:" .ExitCode}}{{println .Output}}{{end}}'
             else
-              echo "Backend container was not created"
+              echo "Selnoid container was not created"
             fi
 
       - name: Run tests
