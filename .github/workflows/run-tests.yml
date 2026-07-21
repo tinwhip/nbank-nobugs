@@ -7,10 +7,15 @@ on: [ push, workflow_dispatch ]
 jobs: # аналог этапов
   run-tests:
     name: Set up services (review apps) and run tests
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     steps: #шаги конкретной job
       - name: Checkout Repository #копируем файлы репозитория внутрь CI агента (раннера)
         uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
 
       - name: Set up JDK
         uses: actions/setup-java@v4

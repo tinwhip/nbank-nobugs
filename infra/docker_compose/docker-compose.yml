@@ -18,6 +18,7 @@ services:
       - nbank-network
 
   backend:
+    platform: linux/arm64
     image: nobugsme/nbank:preprod_version
     ports:
       - "4111:4111"
