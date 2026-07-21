@@ -7,7 +7,7 @@ on: [ push, workflow_dispatch ]
 jobs: # аналог этапов
   run-tests:
     name: Set up services (review apps) and run tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps: #шаги конкретной job
       - name: Checkout Repository #копируем файлы репозитория внутрь CI агента (раннера)
         uses: actions/checkout@v4
