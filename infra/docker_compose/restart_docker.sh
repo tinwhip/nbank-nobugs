@@ -24,4 +24,4 @@ jq -r '.[].versions[].image' "$json_file" |
 
 echo ">>> Запуск Docker Compose"
 
-docker compose up
+docker compose up -d

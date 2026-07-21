@@ -18,7 +18,7 @@ services:
       - nbank-network
 
   backend:
-    image: nobugsme/nbank:with_fraud_check_with_transfer_fix
+    image: nobugsme/nbank:preprod_version
     ports:
       - "4111:4111"
     environment:
@@ -33,38 +33,18 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4111/actuator/health" ]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      timeout: 20s
+      retries: 20
+      start_period: 160s
     networks:
       - nbank-network
 
   frontend:
-    image: nobugsme/nbank-ui:latest
+    image: nobugsme/nbank-ui:preprod_version
     expose: # мы не открываем порт наружу, а даём доступ контейнерам в сети (для безопасности)
-      - "80"
+      - "3000:80"
     depends_on:
       backend:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:80" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - nbank-network
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:80" ]
