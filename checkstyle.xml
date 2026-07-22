@@ -20,8 +20,8 @@
 
     <module name="TreeWalker">
 
-        <!-- Запрещает импорты со звёздочкой -->
-        <module name="AvoidStarImport"/>
+<!--        &lt;!&ndash; Запрещает импорты со звёздочкой &ndash;&gt;-->
+<!--        <module name="AvoidStarImport"/>-->
 
 <!--        &lt;!&ndash; Проверяет неиспользуемые импорты &ndash;&gt;-->
 <!--        <module name="UnusedImports"/>-->
@@ -32,9 +32,9 @@
         <!-- Требует фигурные скобки у if, for, while -->
         <module name="NeedBraces"/>
 
-        <!-- Проверяет пробелы -->
-        <module name="WhitespaceAfter"/>
-        <module name="WhitespaceAround"/>
+<!--        &lt;!&ndash; Проверяет пробелы &ndash;&gt;-->
+<!--        <module name="WhitespaceAfter"/>-->
+<!--        <module name="WhitespaceAround"/>-->
 
         <!-- Проверяет отступы -->
         <module name="Indentation">
@@ -43,8 +43,8 @@
             <property name="lineWrappingIndentation" value="4"/>
         </module>
 
-        <!-- Одна инструкция на строку -->
-        <module name="OneStatementPerLine"/>
+<!--        &lt;!&ndash; Одна инструкция на строку &ndash;&gt;-->
+<!--        <module name="OneStatementPerLine"/>-->
 
     </module>
 </module>

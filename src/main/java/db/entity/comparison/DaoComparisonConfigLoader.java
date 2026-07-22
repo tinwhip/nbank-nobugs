@@ -17,7 +17,7 @@ public class DaoComparisonConfigLoader {
             props.load(input);
             for (String key : props.stringPropertyNames()) {
                 String[] target = props.getProperty(key).split(":");
-                if (target.length != 2) continue;
+                if (target.length != 2) {continue;}
 
                 String daoClassName = target[0].trim();
                 List<String> fields = Arrays.asList(target[1].split(","));

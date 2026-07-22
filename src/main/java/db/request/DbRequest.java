@@ -54,7 +54,7 @@ public class DbRequest {
         if (fieldUpdate != null && !fieldUpdate.isEmpty()) {
             sql.append("SET ");
             for (int i = 0; i < fieldUpdate.size(); i++) {
-                if (i > 0) sql.append(", ");
+                if (i > 0) {sql.append(", ");}
                 FieldUpdate field = fieldUpdate.get(i);
                 sql.append(field.getColumn()).append(" = ? ");
             }
@@ -63,7 +63,7 @@ public class DbRequest {
         if (!conditions.isEmpty()) {
             sql.append("WHERE ");
             for (int i = 0; i < conditions.size(); i++) {
-                if (i > 0) sql.append("\nAND ");
+                if (i > 0) {sql.append("\nAND ");}
                 Condition condition = conditions.get(i);
 
                 sql.append(condition.getColumn()).append(" ")

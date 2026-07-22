@@ -81,7 +81,11 @@ public class UserSteps {
         ).getAll(CreateAccountResponse[].class);
     }
 
-    public TransferResponse transferBetweenAccounts(Long senderAccountId, Long receiverAccountId, double transferAmount) {
+    public TransferResponse transferBetweenAccounts(
+            Long senderAccountId,
+            Long receiverAccountId,
+            double transferAmount
+    ) {
         TransferRequest transferRequest = TransferRequest.builder()
                 .senderAccountId(senderAccountId)
                 .receiverAccountId(receiverAccountId)

@@ -64,7 +64,9 @@ public abstract class BasePage<T extends BasePage<T>> {
         authAsUser(createUserRequest.getUsername(), createUserRequest.getPassword());
     }
 
-    protected <T extends BaseElement> List<T> generatePageElements(ElementsCollection elementsCollection, Function<SelenideElement, T> constructor) {
+    protected <T extends BaseElement> List<T> generatePageElements(
+            ElementsCollection elementsCollection, Function<SelenideElement, T> constructor
+    ) {
         return mapElements(elementsCollection, constructor);
     }
 }

@@ -12,7 +12,11 @@ import io.restassured.specification.ResponseSpecification;
 import static io.restassured.RestAssured.given;
 
 public class CrudRequester extends HttpRequest implements CrudEndpointInterface {
-    public CrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
+    public CrudRequester(
+            RequestSpecification requestSpecification,
+            Endpoint endpoint,
+            ResponseSpecification responseSpecification
+    ) {
         super(requestSpecification, endpoint, responseSpecification);
     }
 
