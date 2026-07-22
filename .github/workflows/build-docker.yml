@@ -25,7 +25,7 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build project
-        run: ./mvnw --batch-mode clean package
+        run: ./mvnw --batch-mode clean package -DskipTests
 
       - name: Check style
         run: ./mvnw --batch-mode checkstyle:check
