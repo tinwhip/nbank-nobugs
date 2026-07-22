@@ -156,5 +156,6 @@ public class TransferWithFraudCheckTest extends BaseTest {
         );
 
         ModelAssertions.assertThatModels(expectedResponse, transferResponse).match();
+        System.out.println();
     }
 }
