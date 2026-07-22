@@ -40,7 +40,7 @@
         <module name="Indentation">
             <property name="basicOffset" value="4"/>
             <property name="caseIndent" value="4"/>
-            <property name="lineWrappingIndentation" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
         </module>
 
 <!--        &lt;!&ndash; Одна инструкция на строку &ndash;&gt;-->

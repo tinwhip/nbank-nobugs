@@ -63,5 +63,6 @@ public class LoginUserTest extends BaseTest {
                                 customer -> customer.getUsername().equals(user.getUsername())
                         ).toList()
         ).hasSize(1);
+        System.out.println();
     }
 }
