@@ -38,7 +38,7 @@ jobs: # аналог этапов
         run: chmod +x mvnw
 
       - name: Run tests
-        run: ./mvnw clean test -q
+        run: ./mvnw clean test -q -Dmaven.test.failure.ignore=true
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend:80

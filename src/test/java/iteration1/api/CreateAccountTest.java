@@ -27,7 +27,6 @@ public class CreateAccountTest extends BaseTest {
                 ResponseSpecs.entityWasCreated()
         ).post(null);
 
-        //запросить все аккаунты пользователя и проверить, что наш аккаунт там
         List<CreateAccountResponse> accounts = new ValidatedCrudRequester<CreateAccountResponse>(
                 RequestSpecs.authAsUser(SessionStorage.getUser()),
                 Endpoint.CUSTOMER_ACCOUNTS,
