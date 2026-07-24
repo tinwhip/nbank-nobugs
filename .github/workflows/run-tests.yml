@@ -42,6 +42,7 @@ jobs: # аналог этапов
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend:80
+          APIVERSION: /api/v1
 
       - name: Run Swagger coverage
         if: always()
@@ -76,4 +77,4 @@ jobs: # аналог этапов
 
       - name: Clean up services
         if: always()
-        run: docker compose down
+        run: cd infra/docker_compose && docker compose down
