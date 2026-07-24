@@ -35,7 +35,7 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
 
     public T checkAlertMessageAndAccept(String bankAlert) {
-        Alert alert = RetryUtils.retry(
+        Alert alert = RetryUtils.retry("Check alert '%s' and accept".formatted(bankAlert),
                 () -> {
                     try {
                         return switchTo().alert(Duration.ofSeconds(3));

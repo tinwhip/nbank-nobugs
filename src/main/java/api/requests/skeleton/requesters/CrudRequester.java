@@ -5,6 +5,8 @@ import api.HttpRequest;
 import api.models.BaseModel;
 import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.interfaces.CrudEndpointInterface;
+import common.configs.Config;
+import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -12,6 +14,8 @@ import io.restassured.specification.ResponseSpecification;
 import static io.restassured.RestAssured.given;
 
 public class CrudRequester extends HttpRequest implements CrudEndpointInterface {
+    private final static String API_VERSION = Config.getProperty("apiVersion");
+
     public CrudRequester(
             RequestSpecification requestSpecification,
             Endpoint endpoint,
@@ -22,13 +26,17 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
 
     @Override
     public ValidatableResponse post(BaseModel model) {
-        var body = model == null ? "" : model;
-        return given()
-                .spec(requestSpecification)
-                .body(body)
-                .post(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification);
+        return StepLogger.log("POST Request to " + endpoint.getUrl(),
+                () -> {
+                    var body = model == null ? "" : model;
+                    return given()
+                            .spec(requestSpecification)
+                            .body(body)
+                            .post(API_VERSION + endpoint.getUrl())
+                            .then()
+                            .spec(responseSpecification);
+                }
+        );
     }
 
     @Override
@@ -37,7 +45,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
                 .spec(requestSpecification)
                 .pathParams(requestParams.getPathParams())
                 .queryParams(requestParams.getQueryParams())
-                .get(endpoint.getUrl())
+                .get(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }
@@ -46,7 +54,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
     public ValidatableResponse get() {
         return given()
                 .spec(requestSpecification)
-                .get(endpoint.getUrl())
+                .get(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }
@@ -56,7 +64,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
         return given()
                 .spec(requestSpecification)
                 .body(baseModel)
-                .put(endpoint.getUrl())
+                .put(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }
@@ -67,7 +75,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
                 .spec(requestSpecification)
                 .pathParams(requestParams.getPathParams())
                 .queryParams(requestParams.getQueryParams())
-                .delete(endpoint.getUrl())
+                .delete(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }
@@ -76,7 +84,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
     public ValidatableResponse getAll(Class<?> clazz) {
         return given()
                 .spec(requestSpecification)
-                .get(endpoint.getUrl())
+                .get(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }
@@ -87,7 +95,7 @@ public class CrudRequester extends HttpRequest implements CrudEndpointInterface 
                 .spec(requestSpecification)
                 .pathParams(requestParams.getPathParams())
                 .queryParams(requestParams.getQueryParams())
-                .get(endpoint.getUrl())
+                .get(API_VERSION + endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
     }

@@ -24,7 +24,7 @@ public class AccountSelector extends BaseElement {
 
     public AccountSelector selectAccount(Long accountId) {
         String accountValue = accountId.toString();
-        RetryUtils.retry(
+        RetryUtils.retry("Select account",
                 () -> {
                     try {
                         element.shouldBe(visible, enabled);

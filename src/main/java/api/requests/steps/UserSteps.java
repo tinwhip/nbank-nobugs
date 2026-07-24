@@ -6,6 +6,7 @@ import api.requests.skeleton.RequestParams;
 import api.requests.skeleton.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 import java.util.List;
 
@@ -74,11 +75,12 @@ public class UserSteps {
     }
 
     public List<CreateAccountResponse> getAllAccounts() {
-        return new ValidatedCrudRequester<CreateAccountResponse>(
-                RequestSpecs.authAsUser(username, password),
-                Endpoint.CUSTOMER_ACCOUNTS,
-                ResponseSpecs.requestReturnsOK()
-        ).getAll(CreateAccountResponse[].class);
+        return StepLogger.log("User " + username + " get all accounts",
+                () -> new ValidatedCrudRequester<CreateAccountResponse>(
+                        RequestSpecs.authAsUser(username, password),
+                        Endpoint.CUSTOMER_ACCOUNTS,
+                        ResponseSpecs.requestReturnsOK()
+                ).getAll(CreateAccountResponse[].class));
     }
 
     public TransferResponse transferBetweenAccounts(

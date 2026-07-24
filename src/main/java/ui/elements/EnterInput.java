@@ -33,7 +33,7 @@ public class EnterInput extends BaseElement {
         element.shouldBe(visible, enabled, interactable);
         element.shouldNotBe(readonly);
 
-        RetryUtils.retry(
+        RetryUtils.retry("Enter value in input",
                 () -> {
                     clear();
                     element.sendKeys(value);
@@ -59,7 +59,7 @@ public class EnterInput extends BaseElement {
         element.shouldBe(visible, enabled, interactable)
                 .shouldNotBe(readonly);
 
-        RetryUtils.retry(
+        RetryUtils.retry("Clear input",
                 () -> {
                     clear();
                     Selenide.sleep(100);
