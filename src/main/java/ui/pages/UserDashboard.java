@@ -19,6 +19,7 @@ public class UserDashboard extends AuthorizedPage<UserDashboard> {
 
     public UserDashboard createNewAccount() {
         createNewAccount.click();
+        getAlert();
         return this;
     }
 

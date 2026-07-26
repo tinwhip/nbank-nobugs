@@ -11,6 +11,7 @@ import ui.pages.UserDashboard;
 
 import java.util.List;
 
+import static constants.BankAlert.NEW_ACCOUNT_CREATED;
 import static db.steps.AccountsTableSteps.getAccountById;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +27,7 @@ public class CreateAccountTest extends BaseUiTest {
         assertThat(createdAccounts).hasSize(1);
 
         new UserDashboard().checkAlertMessageAndAccept
-                (BankAlert.NEW_ACCOUNT_CREATED.getMessage() + createdAccounts.get(0).getAccountNumber());
+                (NEW_ACCOUNT_CREATED.getMessage() + createdAccounts.get(0).getAccountNumber());
 
         assertThat(createdAccounts.get(0).getBalance()).isZero();
         DaoAndModelAssertions.assertThat(createdAccounts.get(0), getAccountById(createdAccounts.get(0).getId())).match();

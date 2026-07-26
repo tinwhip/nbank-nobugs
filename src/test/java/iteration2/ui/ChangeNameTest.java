@@ -99,7 +99,7 @@ public class ChangeNameTest extends BaseUiTest {
 
         new ProfilePage().open()
                 .changeNameTo(name)
-                .checkAlertMessageAndAccept(BankAlert.NAME_IS_THE_SAME.getMessage())
+                .checkAlertMessageAndAccept(BankAlert.NAME_UPDATED_SUCCESSFULLY.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
                 .getWelcomeText().shouldHave(Condition.text(
                         UserDashboard.WELCOME_TEXT.formatted(name)

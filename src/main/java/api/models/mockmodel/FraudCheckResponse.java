@@ -20,13 +20,14 @@ public class FraudCheckResponse extends BaseModel {
 
     public static TransferResponse buildExpectedTransferResponse(
             FraudCheckResponse mockResponse,
+            String status,
             FraudMessage fraudMessage,
             double transferAmount,
             long senderAccountId,
             long receiverAccountId
     ) {
         return TransferResponse.builder()
-                .status(mockResponse.getStatus())
+                .status(status)
                 .message(fraudMessage.getMessage())
                 .amount(transferAmount)
                 .senderAccountId(senderAccountId)

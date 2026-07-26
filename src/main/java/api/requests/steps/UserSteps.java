@@ -109,8 +109,8 @@ public class UserSteps {
         ).get();
     }
 
-    public UpdateCustomerProfileResponse changeProfileName(String name) {
-        return new ValidatedCrudRequester<UpdateCustomerProfileResponse>(
+    public GetCustomerProfileResponse changeProfileName(String name) {
+        return new ValidatedCrudRequester<GetCustomerProfileResponse>(
                 RequestSpecs.authAsUser(username, password),
                 Endpoint.UPDATE_CUSTOMER_PROFILE,
                 ResponseSpecs.requestReturnsOK()

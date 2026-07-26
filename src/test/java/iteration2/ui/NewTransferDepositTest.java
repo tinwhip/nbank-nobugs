@@ -55,7 +55,7 @@ public class NewTransferDepositTest extends BaseUiTest {
                                 TRANSFER_SUCCESSFULLY, transferAmount, recipientAccountNumber
                         )
                 );
-        assertThat(getSenderTransaction(sendAccount.getId(), receiveAccount.getId()).getAmount()).isZero();
+        assertThat(getSenderTransaction(sendAccount.getId(), receiveAccount.getId()).getAmount()).isEqualTo(transferAmount);
         assertThat(getReceiverTransaction(receiveAccount.getId(), sendAccount.getId()).getAmount()).isEqualTo(transferAmount);
     }
 
@@ -86,7 +86,7 @@ public class NewTransferDepositTest extends BaseUiTest {
                         )
                 );
 
-        assertThat(getSenderTransaction(sendAccount.getId(), receiveAccount.getId()).getAmount()).isZero();
+        assertThat(getSenderTransaction(sendAccount.getId(), receiveAccount.getId()).getAmount()).isEqualTo(transferAmount);
         assertThat(getReceiverTransaction(receiveAccount.getId(), sendAccount.getId()).getAmount()).isEqualTo(transferAmount);
     }
 
@@ -115,7 +115,7 @@ public class NewTransferDepositTest extends BaseUiTest {
         receiveAccount = SessionStorage.getSteps().getAccountById(receiveAccount.getId());
 
         assertThat(receiveAccount.getBalance()).isZero();
-        assertThat(receiveAccount.getTransactions()).isEmpty();
+        assertThat(SessionStorage.getSteps().getAllTransactionsByAccountId(receiveAccount.getId())).isEmpty();
         assertThat(getSenderTransaction(sendAccount.getId(), receiveAccount.getId())).isNull();
     }
 
@@ -142,9 +142,7 @@ public class NewTransferDepositTest extends BaseUiTest {
         senderAccount = SessionStorage.getSteps().getAccountById(senderAccount.getId());
 
         assertThat(senderAccount.getBalance()).isEqualTo(amount);
-        assertThat(senderAccount.getTransactions()).anySatisfy(
-                transaction -> assertThat(transaction.getType()).isNotEqualTo(TRANSFER_OUT.name())
-        );
+        assertThat(SessionStorage.getSteps().getAllTransactionsByAccountId(senderAccount.getId())).isEmpty();
     }
 
     @Test
@@ -198,11 +196,11 @@ public class NewTransferDepositTest extends BaseUiTest {
         receiverAccount = SessionStorage.getSteps().getAccountById(receiverAccount.getId());
 
         assertThat(senderAccount.getBalance()).isZero();
-        assertThat(senderAccount.getTransactions()).anySatisfy(
+        assertThat(SessionStorage.getSteps().getAllTransactionsByAccountId(senderAccount.getId())).anySatisfy(
                 transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_OUT.name())
         );
         assertThat(receiverAccount.getBalance()).isEqualTo(amount);
-        assertThat(receiverAccount.getTransactions()).anySatisfy(
+        assertThat(SessionStorage.getSteps().getAllTransactionsByAccountId(receiverAccount.getId())).anySatisfy(
                 transaction -> assertThat(transaction.getType()).isEqualTo(TRANSFER_IN.name())
         );
     }

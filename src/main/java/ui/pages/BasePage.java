@@ -35,7 +35,15 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
 
     public T checkAlertMessageAndAccept(String bankAlert) {
-        Alert alert = RetryUtils.retry("Check alert '%s' and accept".formatted(bankAlert),
+        Alert alert = getAlert();
+        assertThat(alert.getText()).contains(bankAlert);
+        alert.accept();
+
+        return (T) this;
+    }
+
+    public static Alert getAlert() {
+        return RetryUtils.retry("Get alert",
                 () -> {
                     try {
                         return switchTo().alert(Duration.ofSeconds(3));
@@ -47,11 +55,6 @@ public abstract class BasePage<T extends BasePage<T>> {
                 10,
                 4_000
         );
-
-        assertThat(alert.getText()).contains(bankAlert);
-        alert.accept();
-
-        return (T) this;
     }
 
     public static void authAsUser(String username, String password) {

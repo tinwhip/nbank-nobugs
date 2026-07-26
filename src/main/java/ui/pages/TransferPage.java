@@ -1,13 +1,12 @@
 package ui.pages;
 
 import com.codeborne.selenide.Selenide;
-import com.codeborne.selenide.SelenideElement;
+import common.utils.RetryUtils;
 import lombok.Getter;
-import org.openqa.selenium.By;
 import ui.elements.*;
 
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Condition.clickable;
+import static constants.BankAlert.USERS_LIST_IS_NOT_LOADED;
 
 @Getter
 public class TransferPage extends AuthorizedPage<TransferPage> {
@@ -68,7 +67,14 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
         recipientAccountNumberInput.enter(recipientAccountNumber);
         enterAmount.enter(String.valueOf(amount));
         confirmDetailsButton.confirm();
-        sendTransferButton.should(clickable).click();
+        RetryUtils.retry("Send Transfer Button",
+                () -> {
+                    sendTransferButton.should(clickable).click();
+                    return getAlert();
+                },
+                alert -> !alert.getText().equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
+                5,
+                3_000);
         return this;
     }
 
