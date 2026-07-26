@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -26,19 +27,105 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class WiremockExtension implements BeforeEachCallback, AfterEachCallback, ParameterResolver {
     private static final ExtensionContext.Namespace NAMESPACE =
             ExtensionContext.Namespace.create(WiremockExtension.class);
+
     private static final String MOCK_RESPONSE_KEY = "mockResponse";
-    private WireMockServer wireMockServer;
+    private static final String WIREMOCK_SERVER_KEY = "wireMockServer";
+    private static final String LOCK_ACQUIRED_KEY = "wireMockLockAcquired";
+
+    /*
+     * Все тесты, использующие WireMock на одном фиксированном порту,
+     * будут выполняться по очереди.
+     */
+    private static final ReentrantLock WIREMOCK_LOCK =
+            new ReentrantLock(true);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-        AnnotationSupport.findAnnotation(context.getRequiredTestMethod(), Mock.class)
-                .ifPresent(mock -> {
-                    Annotation bodyAnnotation = findMockBodyAnnotation(context);
-                    MockResponse<? extends BaseModel> mockResponse = buildResponseFromAnnotation(bodyAnnotation);
-                    saveMockResponse(context, mockResponse);
-                    setupWireMock(mock, mockResponse);
-                });
+        Optional<Mock> mockAnnotation = AnnotationSupport.findAnnotation(
+                context.getRequiredTestMethod(), Mock.class
+        );
+
+        if (mockAnnotation.isEmpty()) {
+            return;
+        }
+
+        WIREMOCK_LOCK.lock();
+        context.getStore(NAMESPACE).put(LOCK_ACQUIRED_KEY, true);
+
+        try {
+            Mock mock = mockAnnotation.get();
+
+            Annotation bodyAnnotation = findMockBodyAnnotation(context);
+            MockResponse<? extends BaseModel> mockResponse = buildResponseFromAnnotation(bodyAnnotation);
+            saveMockResponse(context, mockResponse);
+
+            WireMockServer server = setupWireMock(mock, mockResponse);
+
+            context.getStore(NAMESPACE).put(WIREMOCK_SERVER_KEY, server);
+        } catch (RuntimeException | Error exception) {
+            context.getStore(NAMESPACE).remove(LOCK_ACQUIRED_KEY);
+            WIREMOCK_LOCK.unlock();
+            throw exception;
+        }
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        WireMockServer wireMockServer = context.getStore(NAMESPACE)
+                .remove(WIREMOCK_SERVER_KEY, WireMockServer.class);
+        try {
+            if (wireMockServer != null && wireMockServer.isRunning()) {
+                wireMockServer.stop();
+            }
+        } finally {
+            context.getStore(NAMESPACE).remove(MOCK_RESPONSE_KEY);
+
+            Boolean lockAcquired = context.getStore(NAMESPACE)
+                    .remove(LOCK_ACQUIRED_KEY, Boolean.class);
+
+            if (Boolean.TRUE.equals(lockAcquired)) {
+                WIREMOCK_LOCK.unlock();
+            }
+        }
+
+
+        context.getStore(NAMESPACE).remove(MOCK_RESPONSE_KEY);
+    }
+
+    private WireMockServer setupWireMock(Mock config, MockResponse<? extends BaseModel> mockResponse) {
+        WireMockServer server = new WireMockServer(
+                WireMockConfiguration.wireMockConfig()
+                        .bindAddress("0.0.0.0")
+                        .port(config.port())
+        );
+        server.start();
+
+        String responseBody = toJson(mockResponse.getBody());
+        ResponseDefinitionBuilder responseBuilder = aResponse()
+                .withStatus(mockResponse.getHttpStatus())
+                .withBody(responseBody);
+        mockResponse.getHeaders().forEach(responseBuilder::withHeader);
+
+        server.stubFor(post(urlPathMatching(config.endpoint().getUrl()))
+                .willReturn(responseBuilder));
+
+        return server;
+//        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(config.port()));
+//        wireMockServer.start();
+//        WireMock.configureFor("0.0.0.0", config.port());
+//
+//        String responseBody = toJson(mockResponse.getBody());
+//
+//        ResponseDefinitionBuilder responseBuilder = aResponse()
+//                .withStatus(mockResponse.getHttpStatus())
+//                .withBody(responseBody);
+//
+//        mockResponse.getHeaders().forEach(responseBuilder::withHeader);
+//
+//        wireMockServer.stubFor(post(urlPathMatching(config.endpoint().getUrl()))
+//                .willReturn(responseBuilder));
     }
 
     @Override
@@ -64,32 +151,6 @@ public class WiremockExtension implements BeforeEachCallback, AfterEachCallback,
         }
 
         return mockResponse.getBody();
-    }
-
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        if (wireMockServer != null) {
-            wireMockServer.stop();
-        }
-
-        context.getStore(NAMESPACE).remove(MOCK_RESPONSE_KEY);
-    }
-
-    private void setupWireMock(Mock config, MockResponse<? extends BaseModel> mockResponse) {
-        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(config.port()));
-        wireMockServer.start();
-        WireMock.configureFor("0.0.0.0", config.port());
-
-        String responseBody = toJson(mockResponse.getBody());
-
-        ResponseDefinitionBuilder responseBuilder = aResponse()
-                .withStatus(mockResponse.getHttpStatus())
-                .withBody(responseBody);
-
-        mockResponse.getHeaders().forEach(responseBuilder::withHeader);
-
-        wireMockServer.stubFor(post(urlPathMatching(config.endpoint().getUrl()))
-                .willReturn(responseBuilder));
     }
 
     private Annotation findMockBodyAnnotation(ExtensionContext context) {
