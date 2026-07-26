@@ -29,13 +29,10 @@ public class UserDashboard extends AuthorizedPage<UserDashboard> {
     public UserDashboard checkWelcomeText(String name) {
         if (getWelcomeText().getText().equals(WELCOME_TEXT.formatted("noname"))) {
             RetryUtils.retry("Check name",
-                    () -> {
-                        refresh();
-                        return getWelcomeText().getText();
-                    },
-                    text -> text.equals(name),
+                    () -> getWelcomeText().getText(),
+                    text -> text.contains(name),
                     5,
-                    3_000
+                    1_000
             );
         }
         getWelcomeText().shouldHave(Condition.text(

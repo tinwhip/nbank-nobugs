@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ui.pages.ProfilePage;
 import ui.pages.UserDashboard;
 
+import static constants.DefaultProfileName.DEFAULT_PROFILE_NAME;
 import static db.steps.CustomerTableSteps.getUserByUsername;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +52,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .changeNameTo(newName)
                 .checkAlertMessageAndAccept(ResponseMessage.NAME_MUST_CONTAIN_TWO_WORDS.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .checkWelcomeText(newName);
+                .checkWelcomeText(DEFAULT_PROFILE_NAME.getDefaultNameValue());
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isNotEqualTo(newName);

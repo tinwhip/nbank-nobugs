@@ -148,30 +148,6 @@ public class RepeatTransferTest extends BaseUiTest {
     }
 
     @Test
-    @DisplayName("Не активность кнопки Send Transfer без выбранного аккаунта")
-    @UserSession(testType = TestType.UI)
-    @ApiVersion(version = "with_validation_fix")
-    @Disabled
-    public void userCanNotRepeatTransferWithoutSelectAccount() {
-        double depositAmount = MAX_TRANSFER_AMOUNT;
-        double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
-        CreateAccountResponse senderAccount = getSteps().createAccount();
-        CreateAccountResponse receiverAccount = getSteps().createAccount();
-
-        getSteps().depositAccount(senderAccount.getId(), depositAmount);
-        getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
-
-        new TransferPage().open()
-                .transferAgain()
-                .selectAccount(senderAccount.getId())
-                .goToTransactionByTransferType(TRANSFER_OUT)
-                .openRepeatTransferWindow()
-                .enterAmount(firstTransferAmount)
-                .confirmDetails()
-                .getSendTransferButton().shouldNot(clickable);
-    }
-
-    @Test
     @DisplayName("Не активность кнопки Send Transfer без подтверждения деталей")
     @UserSession(testType = TestType.UI)
     @ApiVersion(version = "with_validation_fix")
