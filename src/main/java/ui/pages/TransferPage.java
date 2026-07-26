@@ -52,7 +52,18 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
     }
 
     public TransferPage sendTransfer() {
-        sendTransferButton.click();
+        sendTransferButton.should(clickable).click();
+        if (getAlert().getText().equals(USERS_LIST_IS_NOT_LOADED.getMessage())) {
+            RetryUtils.retry("Send Transfer Button",
+                    () -> {
+                        getAlert().accept();
+                        sendTransferButton.should(clickable).click();
+                        return getAlert().getText();
+                    },
+                    alert -> !alert.equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
+                    5,
+                    3_000);
+        }
         return this;
     }
 
@@ -67,14 +78,7 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
         recipientAccountNumberInput.enter(recipientAccountNumber);
         enterAmount.enter(String.valueOf(amount));
         confirmDetailsButton.confirm();
-        RetryUtils.retry("Send Transfer Button",
-                () -> {
-                    sendTransferButton.should(clickable).click();
-                    return getAlert().getText();
-                },
-                alert -> !alert.equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
-                5,
-                3_000);
+        sendTransfer();
         return this;
     }
 

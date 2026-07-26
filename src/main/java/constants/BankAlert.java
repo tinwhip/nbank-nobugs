@@ -30,7 +30,7 @@ public enum BankAlert {
     NAME_IS_THE_SAME("⚠\uFE0F New name is the same as the current one."),
     ENTER_A_VALID_NAME("❌ Please enter a valid name."),
 
-    USERS_LIST_IS_NOT_LOADED( "? Users list is not loaded yet. Please wait a moment and try again.");
+    USERS_LIST_IS_NOT_LOADED( "⏳ Users list is not loaded yet. Please wait a moment and try again.");
 
     private final String message;
 

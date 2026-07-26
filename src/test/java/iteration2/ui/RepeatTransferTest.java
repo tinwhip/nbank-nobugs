@@ -200,12 +200,11 @@ public class RepeatTransferTest extends BaseUiTest {
     @UserSession(testType = TestType.UI)
     @ApiVersion(version = "with_validation_fix")
     public void userCanNotRepeatTransferWithInvalidAmount(double transferAmount, String message) {
-        double depositAmount = MAX_TRANSFER_AMOUNT;
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
         CreateAccountResponse senderAccount = getSteps().createAccount();
         CreateAccountResponse receiverAccount = getSteps().createAccount();
 
-        getSteps().depositAccount(senderAccount.getId(), depositAmount);
+        getSteps().depositAccount(senderAccount.getId(), MAX_TRANSFER_AMOUNT);
         getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
 
         new TransferPage().open()

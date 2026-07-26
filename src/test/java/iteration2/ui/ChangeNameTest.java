@@ -2,13 +2,11 @@ package iteration2.ui;
 
 import api.generators.RandomData;
 import api.models.GetCustomerProfileResponse;
-import com.codeborne.selenide.Condition;
 import common.TestType;
 import common.annotations.ApiVersion;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import constants.BankAlert;
-import constants.DefaultProfileName;
 import constants.ResponseMessage;
 import db.entity.comparison.DaoAndModelAssertions;
 import iteration1.ui.BaseUiTest;
@@ -34,9 +32,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .changeNameTo(newName)
                 .checkAlertMessageAndAccept(BankAlert.NAME_UPDATED_SUCCESSFULLY.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .getWelcomeText().shouldHave(Condition.text(
-                        UserDashboard.WELCOME_TEXT.formatted(newName)
-                ));
+                .checkWelcomeText(newName);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(newName);
@@ -55,9 +51,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .changeNameTo(newName)
                 .checkAlertMessageAndAccept(ResponseMessage.NAME_MUST_CONTAIN_TWO_WORDS.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .getWelcomeText().shouldHave(Condition.text(
-                        DefaultProfileName.DEFAULT_PROFILE_NAME.getDefaultNameValue()
-                ));
+                .checkWelcomeText(newName);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isNotEqualTo(newName);
@@ -78,9 +72,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .changeNameTo(newName)
                 .checkAlertMessageAndAccept(BankAlert.NAME_UPDATED_SUCCESSFULLY.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .getWelcomeText().shouldHave(Condition.text(
-                        UserDashboard.WELCOME_TEXT.formatted(newName)
-                ));
+                .checkWelcomeText(newName);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(newName);
@@ -101,9 +93,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .changeNameTo(name)
                 .checkAlertMessageAndAccept(BankAlert.NAME_UPDATED_SUCCESSFULLY.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .getWelcomeText().shouldHave(Condition.text(
-                        UserDashboard.WELCOME_TEXT.formatted(name)
-                ));
+                .checkWelcomeText(name);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(name);
@@ -125,9 +115,7 @@ public class ChangeNameTest extends BaseUiTest {
                 .saveChanges()
                 .checkAlertMessageAndAccept(BankAlert.ENTER_A_VALID_NAME.getMessage())
                 .getHomeButton().goHome(UserDashboard.class)
-                .getWelcomeText().shouldHave(Condition.text(
-                        UserDashboard.WELCOME_TEXT.formatted(name)
-                ));
+                .checkWelcomeText(name);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(name);

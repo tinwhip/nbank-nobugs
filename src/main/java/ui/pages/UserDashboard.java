@@ -1,10 +1,13 @@
 package ui.pages;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.utils.RetryUtils;
 import lombok.Getter;
 
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.refresh;
 
 @Getter
 public class UserDashboard extends AuthorizedPage<UserDashboard> {
@@ -20,6 +23,24 @@ public class UserDashboard extends AuthorizedPage<UserDashboard> {
     public UserDashboard createNewAccount() {
         createNewAccount.click();
         getAlert();
+        return this;
+    }
+
+    public UserDashboard checkWelcomeText(String name) {
+        if (getWelcomeText().getText().equals(WELCOME_TEXT.formatted("noname"))) {
+            RetryUtils.retry("Check name",
+                    () -> {
+                        refresh();
+                        return getWelcomeText().getText();
+                    },
+                    text -> text.equals(name),
+                    5,
+                    3_000
+            );
+        }
+        getWelcomeText().shouldHave(Condition.text(
+                UserDashboard.WELCOME_TEXT.formatted(name)
+        ));
         return this;
     }
 
