@@ -70,9 +70,9 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
         RetryUtils.retry("Send Transfer Button",
                 () -> {
                     sendTransferButton.should(clickable).click();
-                    return getAlert();
+                    return getAlert().getText();
                 },
-                alert -> !alert.getText().equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
+                alert -> !alert.equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
                 5,
                 3_000);
         return this;

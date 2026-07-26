@@ -37,6 +37,9 @@ jobs: # аналог этапов
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
+      - name: Make Swagger Coverage executable
+        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline
+
       - name: Run tests
         run: ./mvnw clean test -q
         env:
@@ -49,14 +52,15 @@ jobs: # аналог этапов
         run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
 
       - name: Load tests report history
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        continue-on-error: true
         if: always()
         with:
           ref: gh-pages
           path: gh-pages
 
       - name: Build test report
-        uses: simple-elf/allure-report-action@v1.13
+        uses: simple-elf/allure-report-action@master
         if: always()
         with:
           gh_pages: gh-pages
