@@ -38,7 +38,7 @@ jobs: # аналог этапов
         run: chmod +x mvnw
 
       - name: Make Swagger Coverage executable
-        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline
+        run: chmod +x .swagger-coverage-commandline/bin/swagger-coverage-commandline
 
       - name: Run tests
         run: ./mvnw clean test -q
