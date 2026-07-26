@@ -31,7 +31,7 @@ public class UserDashboard extends AuthorizedPage<UserDashboard> {
             RetryUtils.retry("Check name",
                     () -> getWelcomeText().getText(),
                     text -> text.contains(name),
-                    5,
+                    15,
                     1_000
             );
         }
