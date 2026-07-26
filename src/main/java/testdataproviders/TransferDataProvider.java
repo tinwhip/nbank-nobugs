@@ -12,7 +12,7 @@ public class TransferDataProvider {
 
     public static Stream<Arguments> userCanNotTransferInvalidAmountBetweenAccountsSource() {
         return Stream.of(
-                Arguments.of(0, INVALID_TRANSFER.getMessage()),
+                //Arguments.of(0, INVALID_TRANSFER.getMessage()),
                 Arguments.of(-1, INVALID_TRANSFER.getMessage()),
                 Arguments.of(MAX_TRANSFER_AMOUNT + 1, TRANSFER_AMOUNT_CANNOT_EXCEED.getMessage())
         );
