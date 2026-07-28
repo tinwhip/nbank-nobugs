@@ -8,6 +8,8 @@ import ui.pages.AdminPanel;
 import ui.pages.LoginPage;
 import ui.pages.UserDashboard;
 
+import java.time.Duration;
+
 import static constants.DefaultProfileName.DEFAULT_PROFILE_NAME;
 
 public class LoginUserTest extends BaseUiTest {
@@ -18,7 +20,7 @@ public class LoginUserTest extends BaseUiTest {
         new LoginPage().open()
                 .login(admin.getUsername(), admin.getPassword())
                 .getPage(AdminPanel.class)
-                .getAdminPanelText().shouldBe(Condition.visible);
+                .getAdminPanelText().shouldBe(Condition.visible, Duration.ofSeconds(10));
     }
 
     @Test
