@@ -1,7 +1,10 @@
 package ui.pages;
 
+import api.specs.RequestSpecs;
 import com.codeborne.selenide.Selectors;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import lombok.Getter;
 import ui.elements.AccountSelector;
 import ui.elements.Button;
@@ -24,10 +27,15 @@ public class DepositMoney extends AuthorizedPage<DepositMoney> {
     }
 
     public DepositMoney depositMoneyToAccount(Long accountId, double amount) {
-        accountSelector.selectAccount(accountId);
-        amountInput.enter(String.valueOf(amount));
-        depositButton.click();
-        return this;
+        return StepLogger.log("Deposit money (amount = %d) to account %d".formatted(amount, accountId),
+                () -> {
+                    accountSelector.selectAccount(accountId);
+                    amountInput.enter(String.valueOf(amount));
+                    depositButton.click();
+                    return this;
+                }
+        );
+
     }
 
 }

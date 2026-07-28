@@ -1,13 +1,12 @@
 package ui.pages;
 
-import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import lombok.Getter;
 import ui.elements.Button;
 import ui.elements.EnterInput;
 import ui.elements.HomeButton;
 
-import static com.codeborne.selenide.Condition.attribute;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
@@ -26,10 +25,14 @@ public class ProfilePage extends AuthorizedPage<ProfilePage> {
     }
 
     public ProfilePage changeNameTo(String newName) {
-        titlePage.shouldBe(visible);
-        nameInput.enterWhenInputResetting(newName);
-        saveChangesButton.click();
-        return this;
+        return StepLogger.log("Change name to = '%s'".formatted(newName),
+                () -> {
+                    titlePage.shouldBe(visible);
+                    nameInput.enterWhenInputResetting(newName);
+                    saveChangesButton.click();
+                    return this;
+                }
+        );
     }
 
     public ProfilePage clear() {
@@ -38,8 +41,12 @@ public class ProfilePage extends AuthorizedPage<ProfilePage> {
     }
 
     public ProfilePage saveChanges() {
-        saveChangesButton.click();
-        return this;
+        return StepLogger.log("Save changes",
+                () -> {
+                    saveChangesButton.click();
+                    return this;
+                }
+        );
     }
 
 }

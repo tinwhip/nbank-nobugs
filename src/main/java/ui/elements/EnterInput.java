@@ -3,6 +3,7 @@ package ui.elements;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 import lombok.Getter;
 import org.awaitility.Awaitility;
@@ -22,11 +23,15 @@ public class EnterInput extends BaseElement {
     }
 
     public EnterInput enter(String value) {
-        element.shouldBe(visible, enabled, interactable);
-        element.sendKeys(value);
-        element.shouldHave(value(value));
-        element.pressTab();
-        return this;
+        return StepLogger.log("Enter value '%s'".formatted(value),
+                () -> {
+                    element.shouldBe(visible, enabled, interactable);
+                    element.sendKeys(value);
+                    element.shouldHave(value(value));
+                    element.pressTab();
+                    return this;
+                }
+        );
     }
 
     public EnterInput enterWhenInputResetting(String value) {
@@ -50,9 +55,13 @@ public class EnterInput extends BaseElement {
     }
 
     public EnterInput clear() {
-        element.sendKeys(chord(Keys.CONTROL, "a"));
-        element.sendKeys(Keys.BACK_SPACE);
-        return this;
+        return StepLogger.log("Clear input",
+                () -> {
+                    element.sendKeys(chord(Keys.CONTROL, "a"));
+                    element.sendKeys(Keys.BACK_SPACE);
+                    return this;
+                }
+        );
     }
 
     public EnterInput clearWhenInputResetting() {

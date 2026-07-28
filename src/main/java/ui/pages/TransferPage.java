@@ -1,6 +1,7 @@
 package ui.pages;
 
 import com.codeborne.selenide.Selenide;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 import lombok.Getter;
 import ui.elements.*;
@@ -27,44 +28,68 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
     }
 
     public TransferPage selectAccount(Long accountId) {
-        accountSelector.selectAccount(accountId);
-        return this;
+        return StepLogger.log("Select account with id = %d".formatted(accountId),
+                () -> {
+                    accountSelector.selectAccount(accountId);
+                    return this;
+                }
+        );
     }
 
     public TransferPage enterRecipientName(String recipientName) {
-        recipientNameInput.enter(recipientName);
-        return this;
+        return StepLogger.log("Enter recipient name = %s".formatted(recipientName),
+                () -> {
+                    recipientNameInput.enter(recipientName);
+                    return this;
+                }
+        );
     }
 
     public TransferPage enterRecipientAccountNumber(String recipientAccountNumber) {
-        recipientAccountNumberInput.enter(recipientAccountNumber);
-        return this;
+        return StepLogger.log("Enter recipient account number = %s".formatted(recipientAccountNumber),
+                () -> {
+                    recipientAccountNumberInput.enter(recipientAccountNumber);
+                    return this;
+                }
+        );
     }
 
     public TransferPage enterAmount(double amount) {
-        enterAmount.enter(String.valueOf(amount));
-        return this;
+        return StepLogger.log("Enter amount = %f".formatted(amount),
+                () -> {
+                    enterAmount.enter(String.valueOf(amount));
+                    return this;
+                }
+        );
     }
 
     public TransferPage confirmDetails() {
-        confirmDetailsButton.confirm();
-        return this;
+        return StepLogger.log("Confirm details",
+                () -> {
+                    confirmDetailsButton.confirm();
+                    return this;
+                }
+        );
     }
 
     public TransferPage sendTransfer() {
-        sendTransferButton.should(clickable).click();
-        if (getAlert().getText().equals(USERS_LIST_IS_NOT_LOADED.getMessage())) {
-            RetryUtils.retry("Send Transfer Button",
-                    () -> {
-                        getAlert().accept();
-                        sendTransferButton.should(clickable).click();
-                        return getAlert().getText();
-                    },
-                    alert -> !alert.equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
-                    5,
-                    3_000);
-        }
-        return this;
+        return StepLogger.log("Send transfer",
+                () -> {
+                    sendTransferButton.should(clickable).click();
+                    if (getAlert().getText().equals(USERS_LIST_IS_NOT_LOADED.getMessage())) {
+                        RetryUtils.retry("Send Transfer Button",
+                                () -> {
+                                    getAlert().accept();
+                                    sendTransferButton.should(clickable).click();
+                                    return getAlert().getText();
+                                },
+                                alert -> !alert.equals(USERS_LIST_IS_NOT_LOADED.getMessage()),
+                                5,
+                                3_000);
+                    }
+                    return this;
+                }
+        );
     }
 
     public TransferPage sendTransfer(
@@ -73,18 +98,26 @@ public class TransferPage extends AuthorizedPage<TransferPage> {
             String recipientAccountNumber,
             double amount
     ) {
-        accountSelector.selectAccount(accountId);
-        recipientNameInput.enter(recipientName);
-        recipientAccountNumberInput.enter(recipientAccountNumber);
-        enterAmount.enter(String.valueOf(amount));
-        confirmDetailsButton.confirm();
-        sendTransfer();
-        return this;
+        return StepLogger.log("Send transfer",
+                () -> {
+                    accountSelector.selectAccount(accountId);
+                    recipientNameInput.enter(recipientName);
+                    recipientAccountNumberInput.enter(recipientAccountNumber);
+                    enterAmount.enter(String.valueOf(amount));
+                    confirmDetailsButton.confirm();
+                    sendTransfer();
+                    return this;
+                }
+        );
     }
 
     public TransferAgainPage transferAgain() {
-        transferAgainButton.click();
-        return Selenide.page(TransferAgainPage.class);
+        return StepLogger.log("Transfer again",
+                () -> {
+                    transferAgainButton.click();
+                    return Selenide.page(TransferAgainPage.class);
+                }
+        );
     }
 
 }

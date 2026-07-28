@@ -3,6 +3,7 @@ package ui.elements;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import lombok.Getter;
 import ui.pages.RepeatTransferModalWindow;
 import ui.pages.TransferAgainPage;
@@ -28,22 +29,20 @@ public class Transaction extends BaseElement {
     }
 
     public RepeatTransferModalWindow openRepeatTransferWindow() {
-        repeatButton.click();
-        return Selenide.page(RepeatTransferModalWindow.class);
+        return StepLogger.log("Open repeat transfer window",
+                () -> {
+                    repeatButton.click();
+                    return Selenide.page(RepeatTransferModalWindow.class);
+                }
+        );
     }
 
     public Transaction checkRelatedAccountId(long id) {
-        assertThat(relatedAccountId).isEqualTo(id);
-        return this;
+        return StepLogger.log("Check related account id = %d".formatted(id),
+                () -> {
+                    assertThat(relatedAccountId).isEqualTo(id);
+                    return this;
+                }
+        );
     }
-
-    public TransferAgainPage backToTransferAgainPage() {
-        return Selenide.page(TransferAgainPage.class);
-    }
-
-    private String getFoundUnder(String depositInfo) {
-        String[] foundUnderParts = depositInfo.split("Found under:");
-        return foundUnderParts.length > 1 ? foundUnderParts[1].trim() : "";
-    }
-
 }

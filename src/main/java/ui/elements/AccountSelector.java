@@ -1,6 +1,13 @@
 package ui.elements;
 
+import api.Endpoint;
+import api.models.CreateAccountResponse;
+import api.models.DepositRequest;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 
 import java.util.List;
@@ -25,7 +32,7 @@ public class AccountSelector extends BaseElement {
 
     public AccountSelector selectAccount(Long accountId) {
         String accountValue = accountId.toString();
-        RetryUtils.retry("Select account",
+        RetryUtils.retry("Select account %d".formatted(accountId),
                 () -> {
                     try {
                         element.shouldBe(visible, enabled);
@@ -43,13 +50,17 @@ public class AccountSelector extends BaseElement {
     }
 
     public List<AccountElement> getAllAccounts() {
-        element.click();
-        return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
+        return StepLogger.log("Get all accounts",
+                () -> {
+                    element.click();
+                    return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
+                }
+        );
     }
 
     public AccountSelector checkAccountHasBalance(String accountNumber, double amount) {
         double actualAmount = RetryUtils.retry(
-                "Проверка баланса счёта %s".formatted(accountNumber),
+                "Check account %s has balance %f".formatted(accountNumber, amount),
                 () -> getAllAccounts().stream()
                         .filter(account -> account.getAccountNumber().equals(accountNumber))
                         .findFirst()

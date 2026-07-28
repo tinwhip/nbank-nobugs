@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.$;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Getter
 public class AdminPanel extends AuthorizedPage<AdminPanel> {
@@ -24,10 +25,14 @@ public class AdminPanel extends AuthorizedPage<AdminPanel> {
     }
 
     public AdminPanel createUser(String username, String password) {
-        usernameInput.sendKeys(username);
-        passwordInput.sendKeys(password);
-        addUserButton.click();
-        return this;
+        return StepLogger.log("Create user with username = '%s' and password = '%s'".formatted(username, password),
+                () -> {
+                    usernameInput.sendKeys(username);
+                    passwordInput.sendKeys(password);
+                    addUserButton.click();
+                    return this;
+                }
+        );
     }
 
     public List<UserBadge> getAllUsers() {

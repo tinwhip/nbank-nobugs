@@ -6,6 +6,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 import org.openqa.selenium.Alert;
 import ui.elements.BaseElement;
@@ -58,9 +59,13 @@ public abstract class BasePage<T extends BasePage<T>> {
     }
 
     public static void authAsUser(String username, String password) {
-        Selenide.open("/");
-        String userAuthHeader = RequestSpecs.getUserAuthHeader(username, password);
-        Selenide.executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+        StepLogger.log("Auth as user with username = '%s' and password = '%s'".formatted(username, password),
+                () -> {
+                    Selenide.open("/");
+                    String userAuthHeader = RequestSpecs.getUserAuthHeader(username, password);
+                    Selenide.executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
+                }
+        );
     }
 
     public static void authAsUser(CreateUserRequest createUserRequest) {

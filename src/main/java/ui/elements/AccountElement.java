@@ -16,6 +16,5 @@ public class AccountElement extends BaseElement {
         balance = Double.parseDouble(
                 text.split("\\$")[1].replace(")", "")
         );
-        //id = Long.parseLong(accountNumber.replace("ACC", ""));
     }
 }

@@ -1,9 +1,9 @@
 package ui.elements;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.WebElementCondition;
+import common.helpers.StepLogger;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -18,18 +18,30 @@ public class Button extends BaseElement {
     }
 
     public Button click() {
-        element.click();
-        return this;
+        return StepLogger.log("Click button",
+                () -> {
+                    element.click();
+                    return this;
+                }
+        );
     }
 
     public Button should(WebElementCondition condition) {
-        element.should(condition);
-        return this;
+        return StepLogger.log("Button should be %s".formatted(condition.toString()),
+                () -> {
+                    element.should(condition);
+                    return this;
+                }
+        );
     }
 
     public Button shouldNot(WebElementCondition condition) {
-        element.shouldNot(condition);
-        return this;
+        return StepLogger.log("Button should not be %s".formatted(condition.toString()),
+                () -> {
+                    element.shouldNot(condition);
+                    return this;
+                }
+        );
     }
 
 }
