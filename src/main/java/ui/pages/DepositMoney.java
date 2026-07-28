@@ -27,7 +27,7 @@ public class DepositMoney extends AuthorizedPage<DepositMoney> {
     }
 
     public DepositMoney depositMoneyToAccount(Long accountId, double amount) {
-        return StepLogger.log("Deposit money (amount = %d) to account %d".formatted(amount, accountId),
+        return StepLogger.log("Deposit money (amount = %f) to account %d".formatted(amount, accountId),
                 () -> {
                     accountSelector.selectAccount(accountId);
                     amountInput.enter(String.valueOf(amount));
