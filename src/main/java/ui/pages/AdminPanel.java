@@ -9,6 +9,7 @@ import lombok.Getter;
 import ui.elements.UserBadge;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -43,9 +44,9 @@ public class AdminPanel extends AuthorizedPage<AdminPanel> {
         return RetryUtils.retry("Find user by username",
                 () -> getAllUsers().stream().filter(it -> it.getUsername().equals(username))
                         .findAny().orElse(null),
-                result -> result != null,
-                3,
-                1000
+                Objects::nonNull,
+                10,
+                3_000
         );
     }
 }
