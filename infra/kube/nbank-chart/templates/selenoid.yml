@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenoid # kubectl get deployment backend - логи посмотреть как прошёл деплой
+spec:
+  replicas: 1 #количество копий POD
+  selector:
+    matchLabels:
+      app: selenoid #связываем deployment и pod
+  template:
+    metadata:
+      labels:
+        app: selenoid #устанаваливаем лейбл на под
+    spec:
+      containers:
+        - name: selenoid
+          image: aerokube/selenoid:latest-release
+          args: [ "-container-network", "nbank-network" ]
+          ports:
+            - containerPort: 4444
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+            - name: selenoid-config
+              mountPath: /etc/selenoid
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: selenoid-config
+          configMap:
+            name: selenoid-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenoid
+spec:
+  selector:
+    app: selenoid #сервис который мы написали будет направлять трафик на поды у которых app = backend
+  ports:
+    - protocol: TCP
+      port: 4444 # порт на котором работает сервис
+      targetPort: 4444 # куда пересылать внутри пода (контейнер слушает этот порт)
+  type: NodePort # ClusterIP (доступен только внутри кластера), NodePort (открывает порт на всех нодах кластера)

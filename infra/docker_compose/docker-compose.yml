@@ -68,18 +68,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/:/etc/selenoid/:ro
     command: [ "-container-network", "nbank-network" ]
-#    healthcheck:
-#      test: [
-#        "CMD",
-#        "wget",
-#        "-q",
-#        "--spider",
-#        "http://localhost:4444/ping"
-#      ]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 40s
     depends_on:
       frontend:
         condition: service_healthy
