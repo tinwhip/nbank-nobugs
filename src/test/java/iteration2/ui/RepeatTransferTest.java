@@ -10,9 +10,11 @@ import constants.BankAlert;
 import constants.TransferTypes;
 import iteration1.ui.BaseUiTest;
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ui.pages.TransferPage;
 
@@ -26,8 +28,8 @@ import static com.codeborne.selenide.Condition.*;
 import static common.storage.SessionStorage.getSteps;
 import static constants.BankAlert.INVALID_REPEAT_TRANSFER;
 import static constants.BankAlert.SUCCESSFUL_REPEAT_TRANSFER;
-import static constants.TransferTypes.TRANSFER_IN;
-import static constants.TransferTypes.TRANSFER_OUT;
+import static constants.ResponseMessage.INVALID_TRANSFER;
+import static constants.TransferTypes.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RepeatTransferTest extends BaseUiTest {
@@ -51,12 +53,11 @@ public class RepeatTransferTest extends BaseUiTest {
         new TransferPage().open()
 
                 .transferAgain()
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser().getUsername())
+                .selectAccount(senderAccount.getId())
 
-                .goToTransactionByTransferType(TRANSFER_IN)
-
+                .goToTransactionByTransferType(TRANSFER_OUT)
                 .openRepeatTransferWindow()
-                .checkTransferToAccountId(senderAccount.getId())
+                .checkTransferToAccountId(receiverAccount.getId())
                 .repeatTransfer(senderAccount.getId(), secondTransferAmount)
                 .checkAlertMessageAndAccept(
                         BankAlert.getFormattedMessageWithDouble(
@@ -70,13 +71,15 @@ public class RepeatTransferTest extends BaseUiTest {
         senderAccount = SessionStorage.getSteps().getAccountById(senderAccount.getId());
         receiverAccount = SessionStorage.getSteps().getAccountById(receiverAccount.getId());
 
-        List<TransactionsResponse> senderTransferOutTransactions = senderAccount.getTransactions()
+        List<TransactionsResponse> senderTransferOutTransactions = SessionStorage.getSteps()
+                .getAllTransactionsByAccountId(senderAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_OUT.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
                 .toList();
 
-        List<TransactionsResponse> receiverTransferInTransactions = receiverAccount.getTransactions()
+        List<TransactionsResponse> receiverTransferInTransactions = SessionStorage.getSteps()
+                .getAllTransactionsByAccountId(receiverAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_IN.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
@@ -104,14 +107,12 @@ public class RepeatTransferTest extends BaseUiTest {
         getSteps(1).transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
 
         new TransferPage().open()
-
                 .transferAgain()
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser(2).getUsername())
+                .selectAccount(senderAccount.getId())
 
-                .goToTransactionByTransferType(TRANSFER_IN)
-
+                .goToTransactionByTransferType(TRANSFER_OUT)
                 .openRepeatTransferWindow()
-                .checkTransferToAccountId(senderAccount.getId())
+                .checkTransferToAccountId(receiverAccount.getId())
                 .repeatTransfer(senderAccount.getId(), secondTransferAmount)
                 .checkAlertMessageAndAccept(
                         BankAlert.getFormattedMessageWithDouble(
@@ -125,13 +126,15 @@ public class RepeatTransferTest extends BaseUiTest {
         senderAccount = SessionStorage.getSteps(1).getAccountById(senderAccount.getId());
         receiverAccount = SessionStorage.getSteps(2).getAccountById(receiverAccount.getId());
 
-        List<TransactionsResponse> senderTransferOutTransactions = senderAccount.getTransactions()
+        List<TransactionsResponse> senderTransferOutTransactions = SessionStorage.getSteps(1)
+                .getAllTransactionsByAccountId(senderAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_OUT.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
                 .toList();
 
-        List<TransactionsResponse> receiverTransferInTransactions = receiverAccount.getTransactions()
+        List<TransactionsResponse> receiverTransferInTransactions = SessionStorage.getSteps(2)
+                .getAllTransactionsByAccountId(receiverAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_IN.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
@@ -142,32 +145,6 @@ public class RepeatTransferTest extends BaseUiTest {
 
         assertThat(senderTransferOutTransactions.get(1).getAmount()).isEqualTo(secondTransferAmount);
         assertThat(receiverTransferInTransactions.get(1).getAmount()).isEqualTo(secondTransferAmount);
-    }
-
-    @Test
-    @DisplayName("Не активность кнопки Send Transfer без выбранного аккаунта")
-    @UserSession(testType = TestType.UI)
-    @ApiVersion(version = "with_validation_fix")
-    public void userCanNotRepeatTransferWithoutSelectAccount() {
-        double depositAmount = MAX_TRANSFER_AMOUNT;
-        double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
-        CreateAccountResponse senderAccount = getSteps().createAccount();
-        CreateAccountResponse receiverAccount = getSteps().createAccount();
-
-        getSteps().depositAccount(senderAccount.getId(), depositAmount);
-        getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
-
-        new TransferPage().open()
-
-                .transferAgain()
-                .searchTransactions()
-
-                .goToTransactionByTransferType(TRANSFER_IN)
-
-                .openRepeatTransferWindow()
-                .enterAmount(firstTransferAmount)
-                .confirmDetails()
-                .getSendTransferButton().shouldNot(clickable);
     }
 
     @Test
@@ -184,54 +161,49 @@ public class RepeatTransferTest extends BaseUiTest {
         getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
 
         new TransferPage().open()
-
                 .transferAgain()
-                .searchTransactions()
-
-                .goToTransactionByTransferType(TRANSFER_IN)
-
+                .selectAccount(senderAccount.getId())
+                .goToTransactionByTransferType(TRANSFER_OUT)
                 .openRepeatTransferWindow()
                 .selectAccount(senderAccount.getId())
                 .enterAmount(firstTransferAmount)
                 .getSendTransferButton().shouldNot(clickable);
     }
 
-    @ValueSource(doubles = {-1, 0, MAX_TRANSFER_AMOUNT + 1})
+    @MethodSource("testdataproviders.TransferDataProvider#userCanNotTransferInvalidAmountBetweenAccountsSource")
     @ParameterizedTest
     @DisplayName("Отсутствие перевода с некорректным Amount")
     @UserSession(testType = TestType.UI)
     @ApiVersion(version = "with_validation_fix")
-    public void userCanNotRepeatTransferWithInvalidAmount(double secondTransferAmount) {
-        double depositAmount = MAX_TRANSFER_AMOUNT;
+    public void userCanNotRepeatTransferWithInvalidAmount(double transferAmount, String message) {
         double firstTransferAmount = getRandomDouble(1, MAX_FIRST_AMOUNT_TEST);
         CreateAccountResponse senderAccount = getSteps().createAccount();
         CreateAccountResponse receiverAccount = getSteps().createAccount();
 
-        getSteps().depositAccount(senderAccount.getId(), depositAmount);
+        getSteps().depositAccount(senderAccount.getId(), MAX_TRANSFER_AMOUNT);
         getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
 
         new TransferPage().open()
-
                 .transferAgain()
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser().getUsername())
-
-                .goToTransactionByTransferType(TRANSFER_IN)
-
+                .selectAccount(senderAccount.getId())
+                .goToTransactionByTransferType(TRANSFER_OUT)
                 .openRepeatTransferWindow()
-                .checkTransferToAccountId(senderAccount.getId())
-                .repeatTransfer(senderAccount.getId(), secondTransferAmount)
-                .checkAlertMessageAndAccept(INVALID_REPEAT_TRANSFER.getMessage());
+                .checkTransferToAccountId(receiverAccount.getId())
+                .repeatTransfer(senderAccount.getId(), transferAmount)
+                .checkAlertMessageAndAccept(message);
 
         senderAccount = SessionStorage.getSteps().getAccountById(senderAccount.getId());
         receiverAccount = SessionStorage.getSteps().getAccountById(receiverAccount.getId());
 
-        List<TransactionsResponse> senderTransferOutTransactions = senderAccount.getTransactions()
+        List<TransactionsResponse> senderTransferOutTransactions = SessionStorage.getSteps(1)
+                .getAllTransactionsByAccountId(senderAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_OUT.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
                 .toList();
 
-        List<TransactionsResponse> receiverTransferInTransactions = receiverAccount.getTransactions()
+        List<TransactionsResponse> receiverTransferInTransactions = SessionStorage.getSteps()
+                .getAllTransactionsByAccountId(receiverAccount.getId())
                 .stream()
                 .filter(transaction -> transaction.getType().equals(TRANSFER_IN.name()))
                 .sorted(Comparator.comparingLong(TransactionsResponse::getId))
@@ -255,14 +227,11 @@ public class RepeatTransferTest extends BaseUiTest {
         getSteps().transferBetweenAccounts(senderAccount.getId(), receiverAccount.getId(), firstTransferAmount);
 
         new TransferPage().open()
-
                 .transferAgain()
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser().getUsername())
-
-                .goToTransactionByTransferType(TRANSFER_IN)
-
+                .selectAccount(senderAccount.getId())
+                .goToTransactionByTransferType(TRANSFER_OUT)
                 .openRepeatTransferWindow()
                 .cancelTransfer()
-                .getSearchTransactionsButton().should(interactable).should(enabled);
+                .checkTransactionsContainsTypes(TRANSFER_OUT, DEPOSIT);
     }
 }

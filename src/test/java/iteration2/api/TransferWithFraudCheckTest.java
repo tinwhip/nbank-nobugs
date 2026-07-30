@@ -1,4 +1,4 @@
-package iteration1.api;
+package iteration2.api;
 
 import api.mocks.MockEndpoint;
 import api.models.CreateAccountResponse;
@@ -13,6 +13,8 @@ import common.annotations.mock.FraudMockBody;
 import common.annotations.mock.Mock;
 import common.storage.SessionStorage;
 import constants.FraudMessage;
+import constants.FraudResponseStatus;
+import iteration1.api.BaseTest;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +46,7 @@ public class TransferWithFraudCheckTest extends BaseTest {
 
         TransferResponse expectedResponse = buildExpectedTransferResponse(
                 mockResponse,
+                FraudResponseStatus.APPROVED.name(),
                 FraudMessage.SUCCESS,
                 transferAmount,
                 account1.getId(),
@@ -79,6 +82,7 @@ public class TransferWithFraudCheckTest extends BaseTest {
 
         TransferResponse expectedResponse = buildExpectedTransferResponse(
                 mockResponse,
+                FraudResponseStatus.MANUAL_REVIEW_REQUIRED.name(),
                 FraudMessage.MANUAL_REVIEW_REQUIRED,
                 transferAmount,
                 account1.getId(),
@@ -114,6 +118,7 @@ public class TransferWithFraudCheckTest extends BaseTest {
 
         TransferResponse expectedResponse = buildExpectedTransferResponse(
                 mockResponse,
+                FraudResponseStatus.VERIFICATION_REQUIRED.name(),
                 FraudMessage.VERIFICATION_REQUIRED,
                 transferAmount,
                 account1.getId(),
@@ -149,6 +154,7 @@ public class TransferWithFraudCheckTest extends BaseTest {
 
         TransferResponse expectedResponse = buildExpectedTransferResponse(
                 mockResponse,
+                FraudResponseStatus.APPROVED.name(),
                 FraudMessage.SUCCESS,
                 transferAmount,
                 account1.getId(),

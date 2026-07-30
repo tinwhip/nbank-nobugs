@@ -3,13 +3,16 @@ package ui.pages;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 import lombok.Getter;
 import ui.elements.UserBadge;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.codeborne.selenide.Selenide.$;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Getter
 public class AdminPanel extends AuthorizedPage<AdminPanel> {
@@ -22,24 +25,33 @@ public class AdminPanel extends AuthorizedPage<AdminPanel> {
     }
 
     public AdminPanel createUser(String username, String password) {
-        usernameInput.sendKeys(username);
-        passwordInput.sendKeys(password);
-        addUserButton.click();
-        return this;
+        return StepLogger.log("Create user with username = '%s' and password = '%s'".formatted(username, password),
+                () -> {
+                    usernameInput.sendKeys(username);
+                    passwordInput.sendKeys(password);
+                    addUserButton.click();
+                    return this;
+                }
+        );
     }
 
     public List<UserBadge> getAllUsers() {
-        ElementsCollection elementsCollection = $(Selectors.byText("All Users")).parent().findAll("li");
-        return generatePageElements(elementsCollection, UserBadge::new);
+        return StepLogger.log(
+                "Get all users from Dashboard",
+                () -> {
+                    ElementsCollection elementsCollection = $(Selectors.byText("All Users")).parent().findAll("li");
+                    return generatePageElements(elementsCollection, UserBadge::new);
+                }
+        );
     }
 
     public UserBadge findUserByUsername(String username) {
-        return RetryUtils.retry(
+        return RetryUtils.retry("Find user by username",
                 () -> getAllUsers().stream().filter(it -> it.getUsername().equals(username))
                         .findAny().orElse(null),
-                result -> result != null,
-                3,
-                1000
+                Objects::nonNull,
+                10,
+                3_000
         );
     }
 }

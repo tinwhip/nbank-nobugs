@@ -17,4 +17,6 @@ public class TransactionsResponse extends BaseModel {
     private String type;
     private String timestamp;
     private long relatedAccountId;
+    private String status;
+    private boolean fraudCheckRequired;
 }

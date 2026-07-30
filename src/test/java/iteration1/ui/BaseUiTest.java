@@ -1,9 +1,11 @@
 package iteration1.ui;
 
+import com.codeborne.selenide.logevents.SelenideLogger;
 import common.configs.Config;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import common.extensions.BrowserMatchExtension;
+import io.qameta.allure.selenide.AllureSelenide;
 import iteration1.api.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,6 +21,7 @@ public class BaseUiTest extends BaseTest {
         Configuration.baseUrl = Config.getProperty("uiBaseUrl");
         Configuration.browserSize = Config.getProperty("uiBrowserSize");
         Configuration.browser = Config.getProperty("uiBrowser");
+        SelenideLogger.addListener("AllureSelenide", new AllureSelenide());
         //Configuration.headless = true;
 
         Configuration.browserCapabilities.setCapability(

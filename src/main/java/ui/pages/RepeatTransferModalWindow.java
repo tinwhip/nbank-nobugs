@@ -1,6 +1,10 @@
 package ui.pages;
 
-import com.codeborne.selenide.*;
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Selectors;
+import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import lombok.Getter;
 import org.openqa.selenium.By;
 import ui.elements.AccountSelector;
@@ -27,37 +31,63 @@ public class RepeatTransferModalWindow extends BaseElement {
     }
 
     public RepeatTransferModalWindow checkTransferToAccountId(Long accountId) {
-        confirmTransferToAccountId.shouldHave(Condition.text(CONFIRM_TRANSFER_TEXT.formatted(accountId)));
-        return this;
+        return StepLogger.log("Check transfer to account with id = %d".formatted(accountId),
+                () -> {
+                    confirmTransferToAccountId.shouldHave(Condition.text(CONFIRM_TRANSFER_TEXT.formatted(accountId)));
+                    return this;
+                }
+        );
     }
 
     public TransferAgainPage repeatTransfer(Long senderAccountId, double amount) {
-        accountSelector.selectAccount(senderAccountId);
-        amountInput.clear();
-        amountInput.sendKeys(String.valueOf(amount));
-        confirmDetailsButton.confirm();
-        sendTransferButton.should(Condition.clickable).click();
-        return Selenide.page(TransferAgainPage.class);
+        return StepLogger.log(
+                "Repeat transfer (amount = %f) to account with sender account id = %d"
+                        .formatted(amount, senderAccountId),
+                () -> {
+                    accountSelector.selectAccount(senderAccountId);
+                    amountInput.clear();
+                    amountInput.sendKeys(String.valueOf(amount));
+                    confirmDetailsButton.confirm();
+                    sendTransferButton.should(Condition.clickable).click();
+                    return Selenide.page(TransferAgainPage.class);
+                }
+        );
     }
 
     public RepeatTransferModalWindow selectAccount(Long accountId) {
-        accountSelector.selectAccount(accountId);
-        return this;
+        return StepLogger.log("Select account with id = %d".formatted(accountId),
+                () -> {
+                    accountSelector.selectAccount(accountId);
+                    return this;
+                }
+        );
     }
 
     public RepeatTransferModalWindow enterAmount(double amount) {
-        amountInput.clear();
-        amountInput.sendKeys(String.valueOf(amount));
-        return this;
+        return StepLogger.log("Enter amount = %f".formatted(amount),
+                () -> {
+                    amountInput.clear();
+                    amountInput.sendKeys(String.valueOf(amount));
+                    return this;
+                }
+        );
     }
 
     public RepeatTransferModalWindow confirmDetails() {
-        confirmDetailsButton.confirm();
-        return this;
+        return StepLogger.log("Confirm details",
+                () -> {
+                    confirmDetailsButton.confirm();
+                    return this;
+                }
+        );
     }
 
     public TransferAgainPage cancelTransfer() {
-        cancelButton.click();
-        return Selenide.page(TransferAgainPage.class);
+        return StepLogger.log("Cancel transfer",
+                () -> {
+                    cancelButton.click();
+                    return Selenide.page(TransferAgainPage.class);
+                }
+        );
     }
 }

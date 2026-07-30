@@ -1,12 +1,20 @@
 package ui.elements;
 
+import api.Endpoint;
+import api.models.CreateAccountResponse;
+import api.models.DepositRequest;
+import api.requests.skeleton.requesters.ValidatedCrudRequester;
+import api.specs.RequestSpecs;
+import api.specs.ResponseSpecs;
 import com.codeborne.selenide.SelenideElement;
+import common.helpers.StepLogger;
 import common.utils.RetryUtils;
 
 import java.util.List;
 import java.util.Objects;
 
-import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +32,7 @@ public class AccountSelector extends BaseElement {
 
     public AccountSelector selectAccount(Long accountId) {
         String accountValue = accountId.toString();
-        RetryUtils.retry(
+        RetryUtils.retry("Select account %d".formatted(accountId),
                 () -> {
                     try {
                         element.shouldBe(visible, enabled);
@@ -42,18 +50,33 @@ public class AccountSelector extends BaseElement {
     }
 
     public List<AccountElement> getAllAccounts() {
-        element.click();
-        return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
+        return StepLogger.log("Get all accounts",
+                () -> {
+                    element.click();
+                    return generateElements(findAll(ALL_ACCOUNTS_SELECTOR), AccountElement::new);
+                }
+        );
     }
 
     public AccountSelector checkAccountHasBalance(String accountNumber, double amount) {
-        assertThat(
-                getAllAccounts().stream()
+        double actualAmount = RetryUtils.retry(
+                "Check account %s has balance %f".formatted(accountNumber, amount),
+                () -> getAllAccounts().stream()
                         .filter(account -> account.getAccountNumber().equals(accountNumber))
                         .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Account number %s not found".formatted(accountNumber)))
-                        .getBalance()
-        ).isEqualTo(amount);
+                        .orElseThrow(() -> new RuntimeException(
+                                "Account number %s not found".formatted(accountNumber)
+                        ))
+                        .getBalance(),
+                balance -> Double.compare(balance, amount) == 0,
+                10,
+                1_000
+        );
+
+        assertThat(actualAmount)
+                .as("Баланс счёта %s".formatted(accountNumber))
+                .isEqualTo(amount);
+
         return this;
     }
 

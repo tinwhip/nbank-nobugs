@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import java.util.List;
 
 public class ResponseSpecs {
+    private static final String ERROR_PATH = "message";
     private ResponseSpecs() {
     }
 
@@ -44,7 +45,7 @@ public class ResponseSpecs {
     public static ResponseSpecification requestReturnsBadRequest(String errorValue) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
-                .expectBody(Matchers.equalTo(errorValue))
+                .expectBody(ERROR_PATH, Matchers.equalTo(errorValue))
                 .build();
     }
 
@@ -57,7 +58,7 @@ public class ResponseSpecs {
     public static ResponseSpecification requestReturnsForbidden(String errorValue) {
         return defaultResponseBuilder()
                 .expectStatusCode(HttpStatus.SC_FORBIDDEN)
-                .expectBody(Matchers.equalTo(errorValue))
+                .expectBody(ERROR_PATH, Matchers.equalTo(errorValue))
                 .build();
     }
 }

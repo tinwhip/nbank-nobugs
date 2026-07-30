@@ -31,10 +31,11 @@ public class TransferAgainTest extends BaseUiTest {
 
         new TransferPage().open()
                 .transferAgain()
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser().getUsername())
-                .checkTransactionsContainsTypes(TRANSFER_OUT, TRANSFER_IN, DEPOSIT)
-                .checkAllTransactionsHaveAmount(transferAmount)
-                .checkAllTransactionsHaveFoundUnder(SessionStorage.getUser().getUsername());
+                .selectAccount(firstAccount.getId())
+                .checkTransactionsContainsTypes(TRANSFER_OUT, DEPOSIT)
+                .selectAccount(secondAccount.getId())
+                .checkTransactionsContainsTypes(TRANSFER_IN)
+                .checkAllTransactionsHaveAmount(transferAmount);
     }
 
     @Test
@@ -51,14 +52,10 @@ public class TransferAgainTest extends BaseUiTest {
 
         new TransferPage().open().transferAgain()
 
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser(1).getUsername())
+                .selectAccount(firstAccount.getId())
                 .checkTransactionsContainsTypes(TRANSFER_OUT, DEPOSIT)
                 .checkAllTransactionsHaveAmount(transferAmount)
-                .checkAllTransactionsHaveFoundUnder(SessionStorage.getUser(1).getUsername())
-
-                .searchTransactionsByUsernameOrName(SessionStorage.getUser(2).getUsername())
-                .checkTransactionsSize(1)
-                .checkAllTransactionsHaveTypes(TRANSFER_IN)
-                .checkAllTransactionsHaveFoundUnder(SessionStorage.getUser(2).getUsername());
+                .goToTransaction(TRANSFER_OUT)
+                .checkRelatedAccountId(secondAccount.getId());
     }
 }

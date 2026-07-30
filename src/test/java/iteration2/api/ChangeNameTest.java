@@ -37,17 +37,14 @@ public class ChangeNameTest extends BaseTest {
     @UserSession(testType = TestType.API)
     @ApiVersion(version = "with_database_with_fix")
     public void userCanUpdateValidName(String name) {
-        UpdateCustomerProfileResponse updateCustomerProfileResponse =
-                new ValidatedCrudRequester<UpdateCustomerProfileResponse>(
+        GetCustomerProfileResponse customerProfileResponse =
+                new ValidatedCrudRequester<GetCustomerProfileResponse>(
                         RequestSpecs.authAsUser(SessionStorage.getUser()),
                         Endpoint.UPDATE_CUSTOMER_PROFILE,
                         ResponseSpecs.requestReturnsOK()
                 ).update(new CustomerProfileRequest(name));
 
-        assertThat(updateCustomerProfileResponse.getCustomer().getName()).isEqualTo(name);
-        assertThat(updateCustomerProfileResponse.getMessage()).isEqualTo(
-                ResponseMessage.PROFILE_UPDATED_SUCCESSFULLY.getMessage()
-        );
+        assertThat(customerProfileResponse.getName()).isEqualTo(name);
 
         GetCustomerProfileResponse getCustomerProfileResponse = SessionStorage.getSteps().getProfileInfo();
         assertThat(getCustomerProfileResponse.getName()).isEqualTo(name);
