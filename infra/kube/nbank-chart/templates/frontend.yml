@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend # kubectl get deployment backend - логи посмотреть как прошёл деплой
+spec:
+  replicas: 1 #количество копий POD
+  selector:
+    matchLabels:
+      app: frontend #связываем deployment и pod
+  template:
+    metadata:
+      labels:
+        app: frontend #устанаваливаем лейбл на под
+    spec:
+      containers:
+        - name: frontend
+          image: nobugsme/nbank-ui:preprod_version
+          ports:
+            - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend #сервис который мы написали будет направлять трафик на поды у которых app = backend
+  ports:
+    - protocol: TCP
+      port: 80 # порт на котором работает сервис
+      targetPort: 80 # куда пересылать внутри пода (контейнер слушает этот порт)
+  type: NodePort # ClusterIP (доступен только внутри кластера), NodePort (открывает порт на всех нодах кластера)
