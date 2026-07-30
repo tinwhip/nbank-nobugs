@@ -46,14 +46,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 20
-#          livenessProbe:
-#            httpGet:
-#              path: /actuator/health
-#              port: 4111
-#            initialDelaySeconds: 120
-#            periodSeconds: 30
-#            timeoutSeconds: 10
-#            failureThreshold: 5
+
 ---
 
 apiVersion: v1
