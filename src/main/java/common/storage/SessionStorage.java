@@ -21,7 +21,8 @@ public class SessionStorage {
     private final LinkedHashMap<CreateUserRequest, UserSteps> userStepsMap = new LinkedHashMap<>();
     private final LinkedHashMap<String, CreateAccountResponse> accountsMap = new LinkedHashMap<>();
 
-    private SessionStorage() {}
+    private SessionStorage() {
+    }
 
     public static void addUsers(List<CreateUserRequest> users) {
         for (CreateUserRequest user : users) {
@@ -30,11 +31,12 @@ public class SessionStorage {
     }
 
     public static void addAccount(String accountName, CreateAccountResponse account) {
-            INSTANCE.get().accountsMap.put(accountName, account);
+        INSTANCE.get().accountsMap.put(accountName, account);
     }
 
     /**
      * Возвращаем объект CreateUserRequest по его порядковому номеру в списке созданных пользователей
+     *
      * @param number порядковый номер, начиная с 1, а не с 0
      * @return Объект CreateUserRequest, соответствующий указанному порядковому номеру
      */

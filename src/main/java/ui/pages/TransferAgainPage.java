@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.$;
-import static constants.TransferTypes.TRANSFER_OUT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Getter
@@ -63,10 +62,10 @@ public class TransferAgainPage extends AuthorizedPage<TransferAgainPage> {
                 .toList();
 
         assertThat(allTransactionTypes).isEqualTo(
-                        Arrays.stream(transferTypes)
-                                .map(Enum::name)
-                                .toList()
-                );
+                Arrays.stream(transferTypes)
+                        .map(Enum::name)
+                        .toList()
+        );
         return this;
     }
 

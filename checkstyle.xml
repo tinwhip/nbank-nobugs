@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <property name="charset" value="UTF-8"/>
+
+    <!-- Запрещает табы -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <!-- Максимальная длина строки -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^package.*|^import.*|https?://"/>
+    </module>
+
+    <module name="TreeWalker">
+
+<!--        &lt;!&ndash; Запрещает импорты со звёздочкой &ndash;&gt;-->
+<!--        <module name="AvoidStarImport"/>-->
+
+<!--        &lt;!&ndash; Проверяет неиспользуемые импорты &ndash;&gt;-->
+<!--        <module name="UnusedImports"/>-->
+
+<!--        &lt;!&ndash; Проверяет повторяющиеся и лишние импорты &ndash;&gt;-->
+<!--        <module name="RedundantImport"/>-->
+
+        <!-- Требует фигурные скобки у if, for, while -->
+        <module name="NeedBraces"/>
+
+<!--        &lt;!&ndash; Проверяет пробелы &ndash;&gt;-->
+<!--        <module name="WhitespaceAfter"/>-->
+<!--        <module name="WhitespaceAround"/>-->
+
+        <!-- Проверяет отступы -->
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="caseIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
+        </module>
+
+<!--        &lt;!&ndash; Одна инструкция на строку &ndash;&gt;-->
+<!--        <module name="OneStatementPerLine"/>-->
+
+    </module>
+</module>

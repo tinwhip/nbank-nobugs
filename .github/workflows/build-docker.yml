@@ -1,0 +1,36 @@
+name: Build Docker Image And Push To DockerHub
+
+on:
+  push:
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+
+jobs:
+  push-docker-image:
+    name: Build Docker Image And Push To DockerHub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+          cache: maven
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
+      - name: Build project
+        run: ./mvnw --batch-mode clean package -DskipTests
+
+      - name: Check style
+        run: ./mvnw --batch-mode checkstyle:check
+
+      - name: Build and push Docker image
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash push-tests.sh "${{ github.sha }}"

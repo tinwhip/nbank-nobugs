@@ -34,7 +34,9 @@ public abstract class BaseElement {
         return element.findAll(cssSelector);
     }
 
-    protected <T extends BaseElement> List<T> generateElements(ElementsCollection elementsCollection, Function<SelenideElement, T> constructor) {
+    protected <T extends BaseElement> List<T> generateElements(
+            ElementsCollection elementsCollection, Function<SelenideElement, T> constructor
+    ) {
         return mapElements(elementsCollection, constructor);
     }
 }

@@ -42,7 +42,8 @@ public class WiremockExtension implements BeforeEachCallback, AfterEachCallback,
     }
 
     @Override
-    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         MockResponse<? extends BaseModel> mockResponse = getMockResponse(extensionContext);
 
         if (mockResponse == null || mockResponse.getBody() == null) {
@@ -54,7 +55,8 @@ public class WiremockExtension implements BeforeEachCallback, AfterEachCallback,
     }
 
     @Override
-    public @Nullable Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+    public @Nullable Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
         MockResponse<? extends BaseModel> mockResponse = getMockResponse(extensionContext);
 
         if (mockResponse == null || mockResponse.getBody() == null) {
